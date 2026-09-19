@@ -1,0 +1,278 @@
+/* ==========================================================
+   調整用の変数（色やサイズを変えたいときはここを編集）
+   ========================================================== */
+:root {
+  --gold: #d4af6a;
+  --gold-bright: #f4d98a;
+  --cyan: #4fd6f0;
+
+  --phone-width: 340px;   /* スマホ枠の幅 */
+  --logo-width: 78%;      /* ロゴの横幅（枠に対する割合） */
+  --character-height: 46%; /* キャラクターの高さ（枠に対する割合） */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: #0b0d12;
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+  padding: 24px 12px;
+}
+
+/* ============ スマホフレーム ============ */
+
+.phone {
+  width: min(92vw, var(--phone-width));
+  border-radius: 44px; /* iPhone16の角丸に近づける */
+  padding: 10px;
+  background: linear-gradient(160deg, #2a2a2a, #050505);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* ゲーム画面＋広告エリアを含む「画面」全体。iPhone16の論理解像度(393×852pt)を基準にした比率 */
+.phone-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 393 / 852;
+  border-radius: 36px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-color: #10131a;
+  border: 2px solid rgba(255, 255, 255, 0.5); /* 画面の境界線 */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+/* Dynamic Island（iPhone16の見た目に寄せるための装飾） */
+.phone-screen::before {
+  content: "";
+  position: absolute;
+  top: 1.6%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30%;
+  height: 3.2%;
+  background: #000;
+  border-radius: 999px;
+  z-index: 5;
+}
+
+/* バナー広告エリア。画面の内側・最下部に常時表示する帯として配置する */
+.banner-ad {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: 2.5%;
+  height: 6%; /* 320x50相当のバナー比率に近いサイズ感 */
+  border-radius: 8px;
+  border: 2px dashed rgba(255, 255, 255, 0.45);
+  background: repeating-linear-gradient(
+    45deg,
+    #1c2331,
+    #1c2331 8px,
+    #242e40 8px,
+    #242e40 16px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4px 8px;
+  color: #c7cede;
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+
+/* Dynamic Islandの下に十分な余白を空けて配置し、重ならないようにする */
+.player-id {
+  position: absolute;
+  top: 6.5%;
+  left: 4%;
+  font-size: 11px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.logo {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--logo-width);
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+}
+
+.character {
+  position: absolute;
+  bottom: 16%;
+  left: 50%;
+  transform: translateX(-50%);
+  height: var(--character-height);
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.5));
+}
+
+.bottom-area {
+  position: absolute;
+  bottom: 12%; /* 下の広告エリアと重ならないよう余白を確保 */
+  left: 8%;
+  right: 8%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- ローディング --- */
+
+.loading-block {
+  width: 100%;
+  text-align: center;
+}
+
+.loading-label {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: #fff;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+}
+
+.loading-bar-frame {
+  height: 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--gold);
+  background: rgba(10, 14, 22, 0.7);
+  overflow: hidden;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5), inset 0 0 4px rgba(0, 0, 0, 0.6);
+}
+
+.loading-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #1c8fd6, var(--cyan));
+  box-shadow: 0 0 10px var(--cyan);
+  transition: width 0.4s ease;
+}
+
+/* --- STARTボタン --- */
+
+.start-button {
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 0;
+  background: rgba(8, 14, 24, 0.55);
+  border: 1.5px solid var(--gold);
+  border-radius: 999px;
+  color: var(--gold-bright);
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.start-button .deco {
+  color: var(--cyan);
+  font-size: 14px;
+}
+
+/* [hidden] より display:flex が勝ってしまい常時表示になるのを防ぐ */
+.start-button:not([hidden]) {
+  display: flex;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(79, 214, 240, 0.25); }
+  50% { box-shadow: 0 0 22px rgba(79, 214, 240, 0.55); }
+}
+
+/* --- エラーモーダル --- */
+
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  align-items: center;
+  justify-content: center;
+  padding: 10%;
+}
+
+/* [hidden] より display:flex が勝ってしまい常時表示になるのを防ぐ */
+.modal-overlay:not([hidden]) {
+  display: flex;
+}
+
+.modal-box {
+  width: 100%;
+  background: linear-gradient(160deg, #232935, #12151c);
+  border: 1.5px solid var(--gold);
+  border-radius: 10px;
+  padding: 28px 18px 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.modal-icon {
+  width: 44px;
+  height: 44px;
+  margin: -50px auto 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1c8fd6, #0c3a5c);
+  border: 1.5px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--cyan);
+}
+
+.modal-message {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #e8ecf1;
+}
+
+.reconnect-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  background: rgba(20, 40, 60, 0.7);
+  border: 1px solid var(--cyan);
+  border-radius: 6px;
+  color: var(--cyan);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ============ エラー表示トグル ============ */
+
+.error-toggle {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #333c4d;
+  border-radius: 6px;
+  color: #9aa4b5;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.error-toggle:hover {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}

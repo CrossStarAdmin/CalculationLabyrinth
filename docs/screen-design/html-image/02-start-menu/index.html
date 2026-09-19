@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02 スタートメニュー画面</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="phone">
+  <div class="phone-screen" style="background-image:url('../assets/background.png');">
+
+    <!-- 上部バー: 名前(タップでオプションを開く)・コイン・ジェム -->
+    <div class="top-bar">
+      <button class="name-badge" id="nameBadge">
+        <span class="name-icon">✦</span>
+        <span id="playerNameLabel">-</span>
+      </button>
+      <div class="currency-badges">
+        <span class="currency-badge"><span class="currency-icon coin">●</span><span id="coinValue">-</span></span>
+        <span class="currency-badge"><span class="currency-icon gem">◆</span><span id="gemValue">-</span></span>
+      </div>
+    </div>
+
+    <!-- キャラクターの一言。タップするとセリフが変わる -->
+    <div class="speech-bubble" id="speechBubble">
+      <p id="speechText">-</p>
+    </div>
+    <img class="character" src="../assets/character.png" alt="キャラクター" id="characterImage">
+
+    <!-- メニュー -->
+    <div class="menu-area">
+      <button class="mode-button" data-nav="スコアモード">
+        <span class="mode-icon">⚔</span>
+        <span class="mode-text">
+          <span class="mode-title">スコアモード</span>
+          <span class="mode-sub">計算力を磨いてハイスコアを目指そう</span>
+        </span>
+      </button>
+      <button class="mode-button" data-nav="ストーリーモード">
+        <span class="mode-icon">📖</span>
+        <span class="mode-text">
+          <span class="mode-title">ストーリーモード</span>
+          <span class="mode-sub">あかねと遺跡を冒険しよう</span>
+        </span>
+      </button>
+      <div class="sub-menu-row">
+        <button class="sub-menu-button" data-nav="ランキング"><span class="sub-menu-icon">🏅</span><span>ランキング</span></button>
+        <button class="sub-menu-button" data-nav="ショップ"><span class="sub-menu-icon">💰</span><span>ショップ</span></button>
+        <button class="sub-menu-button" data-nav="図鑑"><span class="sub-menu-icon">📘</span><span>図鑑</span></button>
+      </div>
+    </div>
+
+    <!-- 画面遷移の代わりに「本来は◯◯へ遷移する」と一時的に知らせる通知 -->
+    <div class="nav-toast" id="navToast"></div>
+
+    <!-- バナー広告エリア（要件定義 3.4: 画面下部に常時表示） -->
+    <div class="banner-ad">広告表示エリア（バナー広告・常時表示）</div>
+
+    <!-- オプションモーダル -->
+    <div class="option-overlay" id="optionOverlay" hidden>
+      <div class="option-panel">
+        <button class="option-close" id="optionClose" aria-label="閉じる">×</button>
+        <h2 class="option-title">オプション</h2>
+
+        <div class="option-section">
+          <p class="option-label">プレイヤー名</p>
+          <div class="option-name-row">
+            <input type="text" class="option-name-input" id="nameInput" maxlength="20">
+            <button class="option-name-edit" id="changeNameButton">変更</button>
+          </div>
+        </div>
+
+        <div class="option-section">
+          <p class="option-label">サウンド</p>
+          <div class="volume-row">
+            <span class="volume-label">BGM</span>
+            <input type="range" min="0" max="100" id="bgmVolume" class="volume-slider">
+          </div>
+          <div class="volume-row">
+            <span class="volume-label">SE</span>
+            <input type="range" min="0" max="100" id="seVolume" class="volume-slider">
+          </div>
+        </div>
+
+        <button class="option-nav-row" data-nav="アカウント">アカウント <span class="chevron">›</span></button>
+        <button class="option-nav-row" data-nav="利用規約">利用規約 <span class="chevron">›</span></button>
+        <button class="option-nav-row" data-nav="プライバシーポリシー">プライバシーポリシー <span class="chevron">›</span></button>
+
+        <button class="option-return-button" data-nav="タイトル">⇥ タイトルへ戻る</button>
+      </div>
+    </div>
+
+    <!-- 名前変更完了トースト -->
+    <div class="success-toast" id="successToast">✓ プレイヤー名を変更しました</div>
+
+    <!-- 入力エラー用の通知（02-start-menu.md「6. 例外処理」: 空文字・11文字以上・不正な名前） -->
+    <div class="error-toast" id="errorToast">
+      <span id="errorToastMessage">-</span>
+    </div>
+
+    <!-- 表示名の更新に失敗した場合のエラーモーダル（サーバー側の失敗を想定） -->
+    <div class="error-modal-overlay" id="errorModalOverlay" hidden>
+      <div class="error-modal-box">
+        <div class="error-modal-icon">⚠</div>
+        <p class="error-modal-message">名前を変更できませんでした</p>
+        <button class="error-modal-close" id="errorModalClose">閉じる</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 例外系の表示を確認するためのボタン（実際の操作フローとは独立） -->
+<div class="preview-buttons">
+  <button class="preview-toggle" id="previewAlert">入力エラーの通知を見る</button>
+  <button class="preview-toggle" id="previewErrorModal">更新失敗のエラーモーダルを見る</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
