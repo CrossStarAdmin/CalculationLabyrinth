@@ -12,6 +12,17 @@ erDiagram
 UserProfile {
     string id
     string name
+    boolean is_ad_removed
+}
+
+UserSetting {
+    string play_format
+    number bgm_volume
+    number se_volume
+}
+
+UserStoryFlag {
+    number flag
 }
 
 Coin {
@@ -22,21 +33,27 @@ Gem {
     number amount
 }
 
+%% Unlock
+Unlock {
+    string id
+    string user_profile_id
+}
+
 RelicPackageUnlock {
     string relic_package_id
-    string user_profile_id
+    string unlock_id
     boolean is_collected
 }
 
-EnemyUnlock {
-    string enemy_id
-    string user_profile_id
+GuardianUnlock {
+    string guardian_id
+    string unlock_id
     boolean is_collected
 }
 
 ModeUnlock {
     string mode_id
-    string user_profile_id
+    string unlock_id
 }
 
 ModeDifficultyLevelUnlock {
@@ -48,18 +65,18 @@ ModeDifficultyLevelUnlock {
 RunProfile {
     string id
     string user_profile_id
+    string play_format
+    datetime started_at
     number challenge_count
-    number mode_id
-    number mode_difficulty_level_id
+    string mode_id
+    string mode_difficulty_level_id
+    string seed
 }
 
 RunStatus {
     string status
     number life
-}
-
-RunTimer {
-    number timer
+    boolean is_used_bell
 }
 
 RunScore {
@@ -83,8 +100,8 @@ FloorRelic {
     string relic_id
 }
 
-FloorEnemy {
-    string enemy_id
+FloorGuardian {
+    string guardian_id
 }
 
 FloorQuestion {
@@ -92,14 +109,28 @@ FloorQuestion {
     string question_type_id
     string question
     number answer
+    number timer
     number score
 }
 
-%% RunRank
-RunRank {
+%% LocalRank
+LocalRank {
     string id
     string mode_id
-    string mode_difficult_level_id
+    string mode_difficulty_level_id
+    string play_format
+    number rank
+    string user_profile_id
+    string run_profile_id
+}
+
+%% GlobalRank
+
+GlobalRank {
+    string id
+    string mode_id
+    string mode_difficulty_level_id
+    string play_format
     number rank
     string user_profile_id
     string run_profile_id
@@ -110,6 +141,8 @@ Mode {
     string id
     string name
     string description
+    number gem_amount
+    number coin_amount
 }
 
 ModeDifficultyLevel {
@@ -118,6 +151,8 @@ ModeDifficultyLevel {
     string description
     string mode_id
     number difficulty_level
+    number gem_amount
+    number coin_amount
 }
 
 %% Relic
@@ -127,6 +162,7 @@ RelicPackage {
     string description
     string image_url
     number gem_amount
+    number coin_amount
     string[] relic_id
 }
 
@@ -138,8 +174,8 @@ Relic {
     string rarity
 }
 
-%% Enemy
-Enemy {
+%% Guardian
+Guardian {
     string id
     string name
     string description
@@ -154,17 +190,21 @@ QuestionType {
 }
 
 %% 相関図
+UserProfile ||--|| UserSetting: ""
+UserProfile ||--|| UserStoryFlag: ""
 UserProfile ||--|| Coin: ""
 UserProfile ||--|| Gem: ""
-UserProfile ||--|{ RelicPackageUnlock: ""
-UserProfile ||--|{ EnemyUnlock: ""
-UserProfile ||--|{ ModeUnlock: ""
+
+UserProfile ||--|| Unlock: ""
+Unlock ||--|{ RelicPackageUnlock: ""
+Unlock ||--|{ GuardianUnlock: ""
+Unlock ||--|{ ModeUnlock: ""
 ModeUnlock ||--|{ ModeDifficultyLevelUnlock: ""
 
 RelicPackageUnlock ||--|| RelicPackage: ""
 RelicPackage ||--|{ Relic: ""
 
-EnemyUnlock ||--|| Enemy: ""
+GuardianUnlock ||--|| Guardian: ""
 
 ModeUnlock ||--|| Mode: ""
 ModeDifficultyLevelUnlock ||--|| ModeDifficultyLevel: ""
@@ -177,14 +217,20 @@ RunProfile ||--|{ RunOwnedRelic: ""
 
 RunProfile ||--|{ Floor: ""
 Floor ||--|{ FloorRelic: ""
-Floor ||--|{ FloorEnemy: ""
+Floor ||--|{ FloorGuardian: ""
 Floor ||--|{ FloorQuestion: ""
 
-FloorEnemy ||--|| Enemy: ""
+FloorGuardian ||--|| Guardian: ""
 FloorRelic ||--|| Relic: ""
 FloorQuestion ||--|| QuestionType: ""
 
-UserProfile ||--o{ RunRank: ""
-RunProfile ||--o{ RunRank: ""
-Mode ||--|{ RunRank: ""
-ModeDifficultyLevel ||--|{ RunRank: ""
+UserProfile ||--o{ LocalRank: ""
+RunProfile ||--o{ LocalRank: ""
+Mode ||--|{ LocalRank: ""
+ModeDifficultyLevel ||--|{ LocalRank: ""
+
+UserProfile ||--o{ GlobalRank: ""
+RunProfile ||--o{ GlobalRank: ""
+Mode ||--|{ GlobalRank: ""
+ModeDifficultyLevel ||--|{ GlobalRank: ""
+```
