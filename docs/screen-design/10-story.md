@@ -1,6 +1,6 @@
-# 10 アカウント画面(account)
+# 10 ストーリー画面(story)
 
-![アカウント画面](./screen-image-design/10-account/main.png)
+![ストーリー画面](./screen-image-design/10-story/main.png)
 ※画像はあくまでもイメージです。
 
 ## 1. 概要

@@ -12,7 +12,6 @@ overview.md        // 画面遷移の全体像についてまとめます
 06-leaderboard.md  // ランキング
 07-codex.md        // 図鑑
 08-shop.md         // ショップ
-09-settings.md     // 設定
-10-account.md      // アカウント
-11-story.md        // ストーリー
+09-account.md      // アカウント
+10-story.md        // ストーリー
 ```
