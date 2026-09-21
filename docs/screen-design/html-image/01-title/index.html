@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>01 タイトル画面</title>
+<link rel="stylesheet" href="../common/chrome.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -43,9 +44,9 @@
       <div class="modal-box">
         <div class="modal-icon">⚠</div>
         <p class="modal-message" id="errorMessage">通信に失敗しました</p>
-        <button class="reconnect-button" id="reconnectButton">
-          <span class="reload-icon">⟳</span> 再接続
-        </button>
+        <div class="modal-actions">
+          <button class="modal-button" id="reconnectButton"><span class="reload-icon">⟳</span> 再接続</button>
+        </div>
       </div>
     </div>
 
@@ -54,7 +55,9 @@
 </div>
 
 <!-- 押すとエラーモーダルを表示できる確認用ボタン -->
-<button class="error-toggle" id="errorToggle">通信エラー時の表示を見る</button>
+<div class="preview-buttons">
+  <button class="preview-toggle" id="errorToggle">通信エラー時の表示を見る</button>
+</div>
 
 <script src="script.js"></script>
 </body>

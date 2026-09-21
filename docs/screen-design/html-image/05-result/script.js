@@ -112,7 +112,7 @@ function renderResult() {
   resultScoreEl.textContent = CONFIG.score.toLocaleString();
   accuracyValueEl.textContent = CONFIG.accuracy + "%";
   floorValueEl.textContent = "B" + CONFIG.floor;
-  earnedCoinValueEl.textContent = "● " + CONFIG.earnedCoin;
+  earnedCoinValueEl.textContent = CONFIG.earnedCoin;
 }
 
 function appendEmptyRow(listEl) {

@@ -66,6 +66,7 @@ const detailNameEl = document.getElementById("detailName");
 const detailDescEl = document.getElementById("detailDesc");
 const difficultyListEl = document.getElementById("difficultyList");
 const challengeButtonEl = document.getElementById("challengeButton");
+const detailCloseEl = document.getElementById("detailClose");
 
 const navToastEl = document.getElementById("navToast");
 const errorToastEl = document.getElementById("errorToast");
@@ -121,8 +122,27 @@ function findMode(modeId) {
   return CONFIG.modes.find((mode) => mode.id === modeId);
 }
 
-function priceText(item) {
-  return "● " + item.coinPrice.toLocaleString() + " / ◆ " + item.gemPrice;
+// アイコン素材は assets/icon/ に置いたPNGを使う
+function createIcon(fileName, className) {
+  const img = document.createElement("img");
+  img.className = className ? "icon " + className : "icon";
+  img.src = "../assets/icon/" + fileName;
+  img.alt = "";
+  return img;
+}
+
+function createLockIcon(className) {
+  return createIcon("icon-lock.png", className);
+}
+
+// 値段はコインとジェムのアイコンを並べて表す
+function renderPrice(container, item) {
+  container.replaceChildren(
+    createIcon("icon-coin.png"),
+    document.createTextNode(item.coinPrice.toLocaleString()),
+    createIcon("icon-gem.png"),
+    document.createTextNode(item.gemPrice.toLocaleString())
+  );
 }
 
 function renderModeList() {
@@ -130,24 +150,32 @@ function renderModeList() {
 
   CONFIG.modes.forEach((mode) => {
     const button = document.createElement("button");
-    button.className = "mode-row";
+    button.className = "mode-row parchment";
     if (!mode.unlocked) button.classList.add("locked");
     if (mode.id === state.selectedModeId) button.classList.add("selected");
 
-    const icon = document.createElement("span");
-    icon.className = "mode-row-icon";
-    icon.textContent = mode.unlocked ? "⚔" : "🔒";
+    const icon = mode.unlocked
+      ? createIcon("icon-swords.png", "mode-row-icon")
+      : createLockIcon("mode-row-icon");
+
+    const text = document.createElement("span");
+    text.className = "mode-row-text";
 
     const name = document.createElement("span");
     name.className = "mode-row-name";
     name.textContent = mode.name;
 
-    button.append(icon, name);
+    const desc = document.createElement("span");
+    desc.className = "mode-row-desc";
+    desc.textContent = mode.desc;
+
+    text.append(name, desc);
+    button.append(icon, text);
 
     if (!mode.unlocked) {
       const price = document.createElement("span");
       price.className = "mode-row-price";
-      price.textContent = priceText(mode);
+      renderPrice(price, mode);
       button.append(price);
     }
 
@@ -181,17 +209,19 @@ function renderDifficultyList() {
     const unlocked = unlockedIds.includes(difficulty.id);
 
     const cell = document.createElement("button");
-    cell.className = "difficulty-cell";
+    cell.className = "difficulty-cell wood";
     if (!unlocked) cell.classList.add("locked");
     if (difficulty.id === state.selectedDifficultyId) cell.classList.add("selected");
 
     const name = document.createElement("span");
     name.className = "difficulty-name";
-    name.textContent = unlocked ? difficulty.name : "🔒 " + difficulty.name;
+    name.textContent = difficulty.name;
+    if (!unlocked) name.prepend(createLockIcon());
 
     const sub = document.createElement("span");
     sub.className = unlocked ? "difficulty-best" : "difficulty-price";
-    sub.textContent = unlocked ? bestScoreText(modeId, difficulty.id) : priceText(difficulty);
+    if (unlocked) sub.textContent = bestScoreText(modeId, difficulty.id);
+    else renderPrice(sub, difficulty);
 
     cell.append(name, sub);
 
@@ -229,6 +259,27 @@ function selectMode(modeId) {
   renderDifficultyList();
   renderChallengeButton();
 }
+
+// 難易度選択を閉じる（閉じるボタン・パネルの外をタップ）
+function closeDetail() {
+  state.selectedModeId = null;
+  state.selectedDifficultyId = null;
+  detailPanelEl.hidden = true;
+
+  renderModeList();
+  renderChallengeButton();
+}
+
+detailCloseEl.addEventListener("click", closeDetail);
+
+// パネル・モード行・挑戦するボタン・モーダル以外をタップしたら閉じる。
+// 各ボタンの処理で一覧を作り直すと押した要素がDOMから外れ、closest()が効かなくなるため
+// 捕捉フェーズ（第3引数 true）で、作り直される前に判定する
+document.querySelector(".phone-screen").addEventListener("click", (event) => {
+  if (detailPanelEl.hidden) return;
+  if (event.target.closest(".detail-panel, .mode-row, .challenge-button, .modal-overlay")) return;
+  closeDetail();
+}, true);
 
 // ==========================================================
 // 解放（コインかジェムを使い、確認してから購入する）

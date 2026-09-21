@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>05 結果画面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Tokumin:wght@700;800&family=Shippori+Mincho+B1:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../common/chrome.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,40 +16,43 @@
   <div class="phone-screen" style="background-image:url('../assets/background.png');">
     <div class="screen-scrim"></div>
 
-    <h1 class="screen-title" id="resultTitle">-</h1>
+    <!-- 本文領域。ここから先は通常のフローで縦に積む -->
+    <div class="screen-body">
+      <h1 class="screen-title" id="resultTitle">-</h1>
 
-    <!-- 今回のランの結果 -->
-    <div class="result-card">
-      <p class="result-board" id="resultBoard">-</p>
-      <p class="result-score" id="resultScore">-</p>
-      <div class="result-stats">
-        <div class="result-stat"><span class="stat-label">正答率</span><span class="stat-value" id="accuracyValue">-</span></div>
-        <div class="result-stat"><span class="stat-label">到達フロア</span><span class="stat-value" id="floorValue">-</span></div>
-        <div class="result-stat"><span class="stat-label">獲得コイン</span><span class="stat-value" id="earnedCoinValue">-</span></div>
+      <!-- 今回のランの結果 -->
+      <div class="result-card parchment parchment-framed">
+        <p class="result-board" id="resultBoard">-</p>
+        <p class="result-score" id="resultScore">-</p>
+        <div class="result-stats">
+          <div class="result-stat wood"><span class="stat-label">正答率</span><span class="stat-value" id="accuracyValue">-</span></div>
+          <div class="result-stat wood"><span class="stat-label">到達フロア</span><span class="stat-value" id="floorValue">-</span></div>
+          <div class="result-stat wood"><span class="stat-label">獲得コイン</span><span class="stat-value"><img class="icon coin-icon" src="../assets/icon/icon-coin.png" alt=""><span id="earnedCoinValue">-</span></span></div>
+        </div>
       </div>
-    </div>
 
-    <!-- ランキング（取得できなくても進行に支障はない） -->
-    <div class="rank-card local">
-      <div class="rank-head">
-        <p class="rank-title">ローカルランキング</p>
-        <p class="rank-note">自己ベスト5件</p>
+      <!-- ランキング（取得できなくても進行に支障はない）。縦の余りはこの2つが分け合う -->
+      <div class="rank-card local parchment">
+        <div class="rank-head">
+          <p class="rank-title">ローカルランキング</p>
+          <p class="rank-note">自己ベスト5件</p>
+        </div>
+        <ol class="rank-list" id="localRankList"></ol>
       </div>
-      <ol class="rank-list" id="localRankList"></ol>
-    </div>
 
-    <div class="rank-card global">
-      <div class="rank-head">
-        <p class="rank-title">グローバルランキング</p>
-        <p class="rank-note" id="myGlobalRank">-</p>
+      <div class="rank-card global parchment">
+        <div class="rank-head">
+          <p class="rank-title">グローバルランキング</p>
+          <p class="rank-note" id="myGlobalRank">-</p>
+        </div>
+        <ol class="rank-list" id="globalRankList"></ol>
       </div>
-      <ol class="rank-list" id="globalRankList"></ol>
-    </div>
 
-    <!-- 遷移ボタン（どちらも遷移の前に動画広告を表示する） -->
-    <div class="result-actions">
-      <button class="result-button" id="backToMenuButton">メニューに戻る</button>
-      <button class="result-button primary" id="replayButton">もう一度遊ぶ</button>
+      <!-- 遷移ボタン（どちらも遷移の前に動画広告を表示する） -->
+      <div class="result-actions">
+        <button class="result-button" id="backToMenuButton">メニューに戻る</button>
+        <button class="result-button primary" id="replayButton">もう一度遊ぶ</button>
+      </div>
     </div>
 
     <!-- 画面遷移の代わりに「本来は◯◯へ遷移する」と一時的に知らせる通知 -->

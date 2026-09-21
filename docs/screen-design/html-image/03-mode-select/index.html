@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>03 モード / 難易度選択画面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Tokumin:wght@700;800&family=Shippori+Mincho+B1:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../common/chrome.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,28 +18,33 @@
 
     <!-- 上部バー: 戻る・コイン・ジェム -->
     <div class="top-bar">
-      <button class="back-button" data-nav="スタートメニュー">‹ 戻る</button>
+      <button class="back-button parchment" data-nav="スタートメニュー"><img class="icon icon-flip" src="../assets/icon/icon-arrow-right.png" alt=""><span>戻る</span></button>
       <div class="currency-badges">
-        <span class="currency-badge"><span class="currency-icon coin">●</span><span id="coinValue">-</span></span>
-        <span class="currency-badge"><span class="currency-icon gem">◆</span><span id="gemValue">-</span></span>
+        <span class="currency-badge parchment"><img class="icon currency-icon" src="../assets/icon/icon-coin.png" alt=""><span id="coinValue">-</span></span>
+        <span class="currency-badge parchment"><img class="icon currency-icon" src="../assets/icon/icon-gem.png" alt=""><span id="gemValue">-</span></span>
       </div>
     </div>
 
-    <h1 class="screen-title" style="top:12%;">モードをえらぶ</h1>
+    <!-- 本文領域。ここから先は通常のフローで縦に積む -->
+    <div class="screen-body">
+      <h1 class="screen-title">モード選択</h1>
+      <p class="screen-detail">モードを選ぶと難易度を設定できます</p>
 
-    <!-- モード一覧（タイトル画面で取得済みのマスターデータから表示する） -->
-    <div class="mode-list" id="modeList"></div>
+      <!-- モード一覧（タイトル画面で取得済みのマスターデータから表示する）。
+           縦の余りはここが吸い、下の2つは常に最下部に残る -->
+      <div class="mode-list" id="modeList"></div>
 
-    <!-- 選択中モードの詳細と難易度。モードが選ばれるまでは非表示 -->
-    <div class="detail-panel" id="detailPanel" hidden>
-      <p class="detail-name" id="detailName">-</p>
-      <p class="detail-desc" id="detailDesc">-</p>
-      <p class="detail-label">難易度</p>
-      <div class="difficulty-list" id="difficultyList"></div>
+      <!-- 選択中モードの詳細と難易度。モードが選ばれるまでは非表示 -->
+      <div class="detail-panel parchment parchment-framed" id="detailPanel" hidden>
+        <button class="detail-close" id="detailClose" aria-label="閉じる">×</button>
+        <p class="detail-name" id="detailName">-</p>
+        <p class="detail-desc" id="detailDesc">-</p>
+        <p class="detail-label">難易度</p>
+        <div class="difficulty-list" id="difficultyList"></div>
+      </div>
+
+      <button class="challenge-button" id="challengeButton" disabled>挑戦する</button>
     </div>
-
-    <button class="challenge-button" id="challengeButton" disabled>挑戦する</button>
-
     <!-- 画面遷移の代わりに「本来は◯◯へ遷移する」と一時的に知らせる通知 -->
     <div class="nav-toast" id="navToast"></div>
     <div class="error-toast" id="errorToast"><span id="errorToastMessage">-</span></div>
@@ -52,10 +61,10 @@
         <p class="modal-message">支払いに使う通貨をえらんでください</p>
         <div class="pay-choice">
           <button class="pay-button selected" data-currency="coin">
-            <span class="currency-icon coin">●</span> <span id="unlockCoinPrice">-</span>
+            <img class="icon currency-icon" src="../assets/icon/icon-coin.png" alt=""><span id="unlockCoinPrice">-</span>
           </button>
           <button class="pay-button" data-currency="gem">
-            <span class="currency-icon gem">◆</span> <span id="unlockGemPrice">-</span>
+            <img class="icon currency-icon" src="../assets/icon/icon-gem.png" alt=""><span id="unlockGemPrice">-</span>
           </button>
         </div>
         <div class="modal-actions">
