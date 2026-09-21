@@ -1,0 +1,520 @@
+/* ==========================================================
+   調整用の変数（色やサイズを変えたいときはここを編集）
+   ========================================================== */
+:root {
+  --gold: #d4af6a;
+  --gold-bright: #f4d98a;
+  --cyan: #4fd6f0;
+  --red: #e2637a;
+  --green: #5fd88a;
+
+  --phone-width: 340px; /* スマホ枠の幅 */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: #0b0d12;
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+  padding: 24px 12px;
+}
+
+/* ==========================================================
+   共通クロム（.phone 〜 .banner-ad まで）
+   どの画面でもほぼそのまま使う部分。詳しい理由は SKILL.md 参照。
+   ========================================================== */
+
+.phone {
+  width: min(92vw, var(--phone-width));
+  border-radius: 44px; /* iPhone16の角丸に近づける */
+  padding: 10px;
+  background: linear-gradient(160deg, #2a2a2a, #050505);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* 画面全体。iPhone16の論理解像度(393×852pt)を基準にした比率 */
+.phone-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 393 / 852;
+  border-radius: 36px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-color: #10131a;
+  border: 2px solid rgba(255, 255, 255, 0.5); /* 画面の境界線 */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+/* Dynamic Island（iPhone16の見た目に寄せるための装飾） */
+.phone-screen::before {
+  content: "";
+  position: absolute;
+  top: 1.6%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30%;
+  height: 3.2%;
+  background: #000;
+  border-radius: 999px;
+  z-index: 5;
+}
+
+/* 画面全体に暗幕をかけて内容を読みやすくする（背景画像が明るい画面用） */
+.screen-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 9, 14, 0.62);
+}
+
+/* バナー広告エリア。画面の内側・最下部に常時表示する帯として配置する */
+.banner-ad {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: 2.5%;
+  height: 6%; /* 320x50相当のバナー比率に近いサイズ感 */
+  border-radius: 8px;
+  border: 2px dashed rgba(255, 255, 255, 0.45);
+  background: repeating-linear-gradient(
+    45deg,
+    #1c2331,
+    #1c2331 8px,
+    #242e40 8px,
+    #242e40 16px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4px 8px;
+  color: #c7cede;
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+}
+
+/* ==========================================================
+   共通パーツ（上部バー・通知・モーダル）
+   Dynamic Island（top 1.6%〜4.8%）の下に余白を空けて配置する
+   ========================================================== */
+
+.top-bar {
+  position: absolute;
+  top: 6.5%;
+  left: 4%;
+  right: 4%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  z-index: 3;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1.5px solid var(--gold);
+  border-radius: 999px;
+  color: var(--gold-bright);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.screen-title {
+  position: absolute;
+  top: 6.5%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  color: var(--gold-bright);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  z-index: 2;
+}
+
+.currency-badges {
+  display: flex;
+  gap: 6px;
+}
+
+.currency-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1.5px solid var(--gold);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.currency-icon.coin {
+  color: var(--gold-bright);
+}
+
+.currency-icon.gem {
+  color: var(--cyan);
+}
+
+/* --- 画面遷移の代わりの一時的な通知 --- */
+
+.nav-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 20%;
+  transform: translate(-50%, 8px);
+  padding: 8px 16px;
+  background: rgba(10, 14, 22, 0.9);
+  border: 1px solid var(--cyan);
+  border-radius: 999px;
+  color: var(--cyan);
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 30;
+}
+
+.nav-toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+/* --- アラート相当の通知（画面上部に出る赤色の帯） --- */
+
+.error-toast {
+  position: absolute;
+  top: 6.5%;
+  left: 50%;
+  transform: translate(-50%, -10px);
+  padding: 6px 14px;
+  background: rgba(40, 12, 12, 0.92);
+  border: 1px solid var(--red);
+  border-radius: 999px;
+  color: #f5c1cc;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 30;
+}
+
+.error-toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+/* --- 成功アラート相当の通知（緑色版） --- */
+
+.success-toast {
+  position: absolute;
+  top: 6.5%;
+  left: 50%;
+  transform: translate(-50%, -10px);
+  padding: 6px 14px;
+  background: rgba(10, 30, 20, 0.92);
+  border: 1px solid var(--green);
+  border-radius: 999px;
+  color: #bdf0cf;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 30;
+}
+
+.success-toast.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+/* --- 汎用モーダル --- */
+
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 9%;
+}
+
+/* [hidden] より display:flex が勝ってしまい常時表示になるのを防ぐ */
+.modal-overlay:not([hidden]) {
+  display: flex;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 25;
+}
+
+.modal-box {
+  width: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  background: linear-gradient(160deg, #232935, #12151c);
+  border: 1.5px solid var(--gold);
+  border-radius: 10px;
+  padding: 26px 16px 16px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.modal-icon {
+  width: 44px;
+  height: 44px;
+  margin: -46px auto 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1c8fd6, #0c3a5c);
+  border: 1.5px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--cyan);
+}
+
+.modal-title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--gold-bright);
+  letter-spacing: 0.06em;
+}
+
+.modal-message {
+  margin: 0 0 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #e8ecf1;
+}
+
+.modal-note {
+  margin: -8px 0 14px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: #f0a9b6;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.modal-button {
+  flex: 1;
+  min-width: 96px;
+  padding: 9px 12px;
+  background: rgba(20, 40, 60, 0.7);
+  border: 1px solid var(--cyan);
+  border-radius: 6px;
+  color: var(--cyan);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.modal-button.primary {
+  background: rgba(60, 46, 16, 0.7);
+  border-color: var(--gold);
+  color: var(--gold-bright);
+  font-weight: bold;
+}
+
+.modal-button.danger {
+  background: rgba(80, 20, 20, 0.6);
+  border-color: #a4483f;
+  color: #ffb9ae;
+}
+
+/* ==========================================================
+   例外系の表示を確認するためのボタン（画面の外・デモ用）
+   ========================================================== */
+
+.preview-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  max-width: min(92vw, 420px);
+}
+
+.preview-toggle {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #333c4d;
+  border-radius: 6px;
+  color: #9aa4b5;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.preview-toggle:hover {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+
+/* ==========================================================
+   ここから画面固有のスタイル
+   ========================================================== */
+
+.top-bar-title {
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--gold-bright);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+/* 戻るボタンと同じ幅を確保してタイトルを中央に見せる */
+.top-bar-spacer {
+  width: 62px;
+}
+
+/* --- ユーザーID --- */
+
+.id-card {
+  position: absolute;
+  top: 12%;
+  left: 4%;
+  right: 4%;
+  padding: 14px 12px;
+  background: rgba(10, 14, 22, 0.88);
+  border: 1.5px solid var(--gold);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.id-label {
+  margin: 0 0 6px;
+  font-size: 10px;
+  color: #9aa4b5;
+  letter-spacing: 0.06em;
+}
+
+.id-value {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+  word-break: break-all;
+}
+
+.id-note {
+  margin: 0;
+  font-size: 9px;
+  color: #c7cede;
+}
+
+/* --- 引き継ぎの状態 --- */
+
+.status-card {
+  position: absolute;
+  top: 27%;
+  left: 4%;
+  right: 4%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid #333c4d;
+  border-radius: 8px;
+  font-size: 10px;
+  color: #c7cede;
+}
+
+.status-icon {
+  font-size: 13px;
+  color: var(--cyan);
+}
+
+/* --- メニュー --- */
+
+.menu-list {
+  position: absolute;
+  top: 34%;
+  left: 4%;
+  right: 4%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(10, 14, 22, 0.88);
+  border: 1.5px solid var(--gold);
+  border-radius: 10px;
+  color: #e8ecf1;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.menu-row.danger {
+  border-color: #a4483f;
+  color: #ffb9ae;
+}
+
+.menu-row .chevron {
+  color: #9aa4b5;
+}
+
+/* --- 入力フォーム --- */
+
+.form-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 10px;
+  color: #9aa4b5;
+  text-align: left;
+}
+
+.form-input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid #333c4d;
+  border-radius: 6px;
+  color: #e8ecf1;
+  font-size: 13px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--cyan);
+}
+
+/* --- 問い合わせ先 --- */
+
+.contact-address {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--cyan);
+  word-break: break-all;
+}
