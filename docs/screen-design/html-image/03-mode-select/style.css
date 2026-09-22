@@ -124,21 +124,59 @@ body {
   font-size: 11px;
 }
 
-/* --- 選択中モードの詳細と難易度 --- */
+/* --- 詳細と難易度のシート --- */
+/* モードを選ぶと下からせり上がる。難易度と「挑戦する」はこの中に入れる。
+   display ではなく opacity と transform で出し入れするので、
+   [hidden] の打ち消しは要らず、滑らかに動かせる */
 
-/* 位置は .screen-body のフローで決まる。閉じるボタンの基準として relative だけ持つ */
-.detail-panel {
-  position: relative;
-  flex: none;
-  padding: 12px;
+.sheet-overlay {
+  position: absolute;
+  /* バナー広告（bottom 2.5% + height 6%）は常時表示なので、その手前で止める */
+  inset: 0 0 10% 0;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+  z-index: 20;
 }
 
-/* [hidden] より display が勝ってしまい常時表示になるのを防ぐ */
+.sheet-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sheet {
+  position: relative;
+  width: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 10px 14px 16px;
+  /* 下辺は画面の端に付くので、上の角だけ丸める */
+  border-radius: 14px 14px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.28s ease;
+}
+
+.sheet-overlay.show .sheet {
+  transform: translateY(0);
+}
+
+/* 上端のつまみ。下から出てきたことが分かるようにする */
+.sheet-handle {
+  width: 38px;
+  height: 4px;
+  margin: 0 auto 10px;
+  border-radius: 999px;
+  background: rgba(92, 58, 22, 0.45);
+}
+
 /* 閉じるボタン。紙の隅に打った留め具のように置く */
-.detail-close {
+.sheet-close {
   position: absolute;
-  top: 7px;
-  right: 7px;
+  top: 8px;
+  right: 10px;
   width: 20px;
   height: 20px;
   padding: 0;
@@ -149,11 +187,6 @@ body {
   font-size: 13px;
   line-height: 1;
   cursor: pointer;
-  z-index: 1; /* 二重罫の擬似要素より手前 */
-}
-
-.detail-panel:not([hidden]) {
-  display: block;
 }
 
 .detail-name {
@@ -247,8 +280,9 @@ body {
 /* 画面で唯一の赤。素材を足さず、赤地＋金の二重線だけで最も強く見せる */
 
 .challenge-button {
-  flex: none;
-  margin: 0 4%; /* 一覧より少し内側に置いて、最後の操作だと分かるようにする */
+  display: block;
+  width: 100%;
+  margin-top: 12px;
   padding: 12px 0;
   background: rgba(126, 28, 20, 0.88);
   border: 1.5px solid var(--gold);

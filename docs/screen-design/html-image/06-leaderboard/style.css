@@ -1,171 +1,227 @@
 /* ==========================================================
    06 ランキング画面の固有スタイル
-   共通部分（スマホ枠・バナー広告・モーダル・確認用ボタン）は
-   ../common/chrome.css にあります
+   共通部分（スマホ枠・バナー広告・モーダル・羊皮紙・木札・
+   本文領域・アイコン・確認用ボタン）は ../common/chrome.css にあります
+
+   層の分け方は05に合わせる。
+   見るランキングの条件＝枠だけの選択欄、一覧の台紙＝羊皮紙
    ========================================================== */
 
-.top-bar-title {
-  font-size: 13px;
-  letter-spacing: 0.1em;
-  color: var(--gold-bright);
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+/* 画面全体を明朝にして冒険譚の雰囲気に寄せる */
+body {
+  font-family: var(--font-body);
 }
 
-/* 戻るボタンと同じ幅を確保してタイトルを中央に見せる */
-.top-bar-spacer {
-  width: 62px;
+.screen-title {
+  font-family: var(--font-heading);
+  line-height: 1.1;
 }
 
-/* --- ボードの選択 --- */
+/* --- 上部バー --- */
 
-.board-select {
-  position: absolute;
-  top: 11.5%;
-  left: 4%;
-  right: 4%;
-  display: flex;
+.back-button {
   gap: 6px;
+  padding: 6px 13px;
+  font-family: var(--font-heading);
+  font-size: 12.5px;
 }
 
-.board-field {
-  flex: 1;
-  min-width: 0;
-  padding: 7px 6px;
-  background: rgba(10, 14, 22, 0.9);
+/* 右向きの矢印素材を反転して「戻る」に使う */
+.icon-flip {
+  font-size: 12px;
+  transform: scaleX(-1);
+}
+
+/* --- 見るランキングの条件 --- */
+/* モード × 難易度 × プレイ形式 × 集計期間。2×2で同じ大きさに並べる */
+
+.board-tag {
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.board-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  background: rgba(8, 12, 20, 0.6);
   border: 1.5px solid var(--gold);
-  border-radius: 8px;
-  color: #e8ecf1;
-  font-size: 10px;
-}
-
-/* --- タブ --- */
-
-.tab-row {
-  position: absolute;
-  left: 4%;
-  right: 4%;
-  top: 16%;
-  display: flex;
-  gap: 6px;
-}
-
-.tab-row.scope {
-  top: 21%;
-}
-
-.tab-button {
-  flex: 1;
-  padding: 7px 0;
-  background: rgba(8, 14, 24, 0.8);
-  border: 1.5px solid #4a5265;
-  border-radius: 999px;
-  color: #9aa4b5;
-  font-size: 10px;
+  border-radius: 6px;
+  color: var(--gold-bright);
+  box-shadow: inset 0 0 0 3px rgba(212, 175, 106, 0.18);
   cursor: pointer;
 }
 
-.tab-button.selected {
-  border-color: var(--cyan);
-  background: rgba(20, 40, 60, 0.8);
-  color: var(--cyan);
-  font-weight: bold;
+/* 押せるものなので、押したときに少し沈める */
+.board-item:active {
+  transform: translateY(1px);
+  box-shadow: none;
 }
 
-/* --- ランキング本体 --- */
-
-.rank-panel {
-  position: absolute;
-  left: 4%;
-  right: 4%;
-  top: 26.5%;
-  bottom: 18%;
-  padding: 10px 12px;
-  background: rgba(10, 14, 22, 0.88);
-  border: 1.5px solid var(--gold);
-  border-radius: 10px;
-  overflow-y: auto;
+/* 枠そのものを選択欄にするため、既定の見た目を消す */
+.board-field {
+  flex: 1;
+  min-width: 0;
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-overflow: ellipsis;
+  cursor: pointer;
 }
 
-.rank-caption {
-  margin: 0 0 8px;
+/* 選択肢の一覧は端末側の描画になるため、読める色を指定する */
+.board-field option {
+  color: #2c150e;
+  background: #ead9b4;
+}
+
+/* 選べることを示す下向きの印。右向きの矢印素材を回して使う */
+.board-caret {
+  flex: none;
   font-size: 9px;
-  color: #9aa4b5;
+  transform: rotate(90deg);
+  filter: brightness(2.6) saturate(0.7);
+}
+
+/* --- ランキング --- */
+/* 行は箱にせず、紙に引いた罫線で区切る */
+
+.rank-card {
+  flex: 1 1 0;
+  min-height: 0; /* flexアイテムは既定で縮まないため、スクロールを効かせる */
+  display: flex;
+  flex-direction: column;
+  padding: 9px 12px;
+}
+
+.card-head {
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 5px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(92, 58, 22, 0.45);
+}
+
+.card-note {
+  margin: 0;
+  font-size: 9px;
+  white-space: nowrap;
+  color: var(--parchment-ink-sub);
+}
+
+.rank-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.rank-tab {
+  padding: 3px 9px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px 4px 0 0;
+  color: var(--parchment-ink-sub);
+  font-family: var(--font-heading);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+/* 選択中は紙に押した印のように、文字を濃くして枠で囲う */
+.rank-tab.selected {
+  color: var(--parchment-ink);
+  font-weight: 700;
+  background: rgba(120, 86, 44, 0.16);
+  border-color: rgba(92, 58, 22, 0.4);
+  border-bottom-color: transparent;
+  text-shadow: 0 1px 0 rgba(255, 250, 235, 0.6);
 }
 
 .rank-list {
-  margin: 0;
-  padding: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  /* 自分の行の帯（margin: 0 -6px）がはみ出さないよう、同じ分だけ内側に余白を取る */
+  margin: 0 -6px;
+  padding: 0 6px;
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
 }
 
 .rank-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
-  color: #e8ecf1;
+  padding: 3px 0;
+  font-size: 10.5px;
+  color: var(--parchment-ink);
 }
 
-/* 自分の行は色を変えて見分けやすくする */
+/* 行の間だけ罫線を引く（最後の行の下には引かない） */
+.rank-row + .rank-row {
+  border-top: 1px solid rgba(92, 58, 22, 0.2);
+}
+
+/* 自分の行は紙に印を押したように帯を敷いて見分ける */
 .rank-row.self {
-  color: var(--cyan);
-  font-weight: bold;
+  margin: 0 -6px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  background: rgba(126, 28, 20, 0.16);
+  box-shadow: inset 2px 0 0 rgba(126, 28, 20, 0.8);
+  font-weight: 700;
 }
 
 .rank-position {
-  width: 32px;
-  color: #9aa4b5;
+  min-width: 26px; /* 4桁の順位でも折り返さないよう、下限だけ決める */
+  white-space: nowrap;
+  color: var(--parchment-ink-sub);
+  font-variant-numeric: tabular-nums;
 }
 
 .rank-row.self .rank-position {
-  color: var(--cyan);
+  color: #8e2318;
 }
 
 .rank-name {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .rank-score {
+  font-family: var(--font-heading);
   font-variant-numeric: tabular-nums;
+}
+
+/* グローバルの自分の順位。上位に出てこないので、一覧とは切り離して最下部に置く */
+.rank-self {
+  flex: none;
+  margin-top: 5px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(92, 58, 22, 0.45);
+}
+
+/* [hidden] より display が勝ってしまい常時表示になるのを防ぐ */
+.rank-self:not([hidden]) {
+  display: block;
 }
 
 /* 取得できなかったときの文言（エラーは出さない） */
 .rank-empty {
-  font-size: 11px;
-  color: #9aa4b5;
-}
-
-/* --- 自分の順位（グローバル表示時のみ） --- */
-
-.my-rank {
-  position: absolute;
-  left: 4%;
-  right: 4%;
-  bottom: 11%;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 12px;
-  background: rgba(20, 40, 60, 0.9);
-  border: 1.5px solid var(--cyan);
-  border-radius: 10px;
-  color: var(--cyan);
-  font-size: 11px;
-  font-weight: bold;
-}
-
-/* [hidden] より display:flex が勝ってしまい常時表示になるのを防ぐ */
-.my-rank:not([hidden]) {
-  display: flex;
-}
-
-/* 自分の順位は桁数が多くなるため、固定幅にせず折り返さない */
-.my-rank .rank-position {
-  width: auto;
-  white-space: nowrap;
+  padding: 3px 0;
+  font-size: 10px;
+  color: var(--parchment-ink-sub);
 }

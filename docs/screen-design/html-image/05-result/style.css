@@ -12,6 +12,45 @@ body {
   font-family: var(--font-body);
 }
 
+/* 上部バーが無い画面なので、その分だけ本文を上に詰めて条件の札を置く */
+.screen-body {
+  top: 7.5%;
+}
+
+/* そのランの条件。CLEARの上に3枚の札として掲げる */
+.board-tag {
+  flex: none;
+  align-self: center;
+  display: flex;
+  gap: 5px;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 2px rgba(30, 16, 4, 0.85);
+}
+
+.board-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+}
+
+/* 茶色の素材は木札の上では沈むので明るくする */
+.board-icon {
+  font-size: 14px;
+  filter: brightness(2.6) saturate(0.7);
+}
+
+/* TODO: 難易度・出題形式のアイコン素材待ち。届くまでは枠だけ置く */
+.board-art {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 1px dashed rgba(246, 230, 198, 0.45);
+  border-radius: 2px;
+}
+
 .screen-title {
   font-family: var(--font-heading);
   line-height: 1.1; /* 見出しの行間を詰めて、下のランキングに高さを回す */
@@ -27,7 +66,6 @@ body {
 
 .result-board {
   margin: 0 0 2px;
-  font-size: 10px;
   color: var(--parchment-ink-sub);
 }
 
@@ -76,37 +114,20 @@ body {
   font-size: 13px;
 }
 
-/* --- ランキング --- */
-/* 行は箱にせず、紙に引いた罫線で区切る */
+/* --- カードの見出し（遺物・ランキング共通） --- */
 
-.rank-card {
-  display: flex;
-  flex-direction: column;
-  padding: 9px 12px;
-}
-
-/* 自己ベスト5件は件数が決まっているので、必要な高さだけ取る */
-.rank-card.local {
-  flex: none;
-}
-
-/* Best100の一部を出すので、縦の余りはこちらが吸ってスクロールする */
-.rank-card.global {
-  flex: 1 1 0;
-  min-height: 0; /* flexアイテムは既定で縮まないため、スクロールを効かせる */
-}
-
-.rank-head {
+.card-head {
   flex: none;
   display: flex;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
+  gap: 8px;
   margin-bottom: 5px;
   padding-bottom: 4px;
   border-bottom: 1px solid rgba(92, 58, 22, 0.45);
 }
 
-.rank-title {
+.card-title {
   margin: 0;
   font-family: var(--font-heading);
   font-size: 11.5px;
@@ -115,18 +136,119 @@ body {
   text-shadow: 0 1px 0 rgba(255, 250, 235, 0.6);
 }
 
-.rank-note {
+.card-note {
   margin: 0;
   font-size: 9px;
+  white-space: nowrap;
   color: var(--parchment-ink-sub);
+}
+
+/* --- 得た遺物 --- */
+/* フロアごとに1つ選ぶので最大5枚。紙の上に札を並べる */
+
+/* スコアと遺物一覧の境目。結果カードの中を2段に分ける */
+.result-card .card-head {
+  margin-top: 11px;
+  padding-top: 9px;
+}
+
+/* 枠は常に5つ見える幅にそろえ、6つ目からは横スクロールで見る */
+.relic-list {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding-bottom: 7px; /* 札の厚みの影とスクロールバーの分 */
+}
+
+.relic-plate {
+  flex: 0 0 calc((100% - 4 * 5px) / 5);
+  min-width: 0;
+  min-height: 58px; /* 全部が未獲得でも段の高さが変わらないようにする */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 5px 2px;
+}
+
+/* 未獲得の枠。札を置かず点線で覆う */
+.relic-plate.empty {
+  border: 1px dashed rgba(92, 58, 22, 0.55);
+  border-radius: 5px;
+  background: rgba(92, 58, 22, 0.07);
+}
+
+/* TODO: 遺物のアイコン素材待ち。届くまでは枠だけ置く */
+.relic-art {
+  width: 22px;
+  height: 22px;
+  border: 1px dashed rgba(246, 230, 198, 0.4);
+  border-radius: 3px;
+}
+
+.relic-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-heading);
+  font-size: 9px;
+  text-shadow: 0 1px 2px rgba(30, 16, 4, 0.8);
+}
+
+.relic-rarity {
+  font-size: 7.5px;
+  letter-spacing: -0.5px;
+  color: #e8c877;
+}
+
+/* --- ランキング --- */
+/* 行は箱にせず、紙に引いた罫線で区切る。
+   ローカルとグローバルは1枚のカードをタブで切り替える */
+
+.rank-card {
+  flex: 1 1 0;
+  min-height: 0; /* flexアイテムは既定で縮まないため、スクロールを効かせる */
+  display: flex;
+  flex-direction: column;
+  padding: 9px 12px;
+}
+
+.rank-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.rank-tab {
+  padding: 3px 9px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px 4px 0 0;
+  color: var(--parchment-ink-sub);
+  font-family: var(--font-heading);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+/* 選択中は紙に押した印のように、文字を濃くして下に線を引く */
+.rank-tab.selected {
+  color: var(--parchment-ink);
+  font-weight: 700;
+  background: rgba(120, 86, 44, 0.16);
+  border-color: rgba(92, 58, 22, 0.4);
+  border-bottom-color: transparent;
+  text-shadow: 0 1px 0 rgba(255, 250, 235, 0.6);
 }
 
 .rank-list {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  margin: 0;
-  padding: 0;
+  /* 自分の行の帯（margin: 0 -6px）がはみ出さないよう、同じ分だけ内側に余白を取る */
+  margin: 0 -6px;
+  padding: 0 6px;
+
   list-style: none;
 }
 
@@ -155,7 +277,8 @@ body {
 }
 
 .rank-position {
-  width: 26px;
+  min-width: 26px; /* 4桁の順位でも折り返さないよう、下限だけ決める */
+  white-space: nowrap;
   color: var(--parchment-ink-sub);
   font-variant-numeric: tabular-nums;
 }
@@ -175,6 +298,19 @@ body {
 .rank-score {
   font-family: var(--font-heading);
   font-variant-numeric: tabular-nums;
+}
+
+/* グローバルの自分の順位。上位に出てこないので、一覧とは切り離して最下部に置く */
+.rank-self {
+  flex: none;
+  margin-top: 5px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(92, 58, 22, 0.45);
+}
+
+/* [hidden] より display が勝ってしまい常時表示になるのを防ぐ */
+.rank-self:not([hidden]) {
+  display: block;
 }
 
 /* 取得できなかったときの文言（エラーは出さない） */

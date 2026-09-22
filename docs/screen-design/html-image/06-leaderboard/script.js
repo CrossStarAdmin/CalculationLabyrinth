@@ -46,16 +46,12 @@ const state = {
 const modeSelectEl = document.getElementById("modeSelect");
 const difficultySelectEl = document.getElementById("difficultySelect");
 const formatSelectEl = document.getElementById("formatSelect");
-const periodTabsEl = document.getElementById("periodTabs");
+const periodSelectEl = document.getElementById("periodSelect");
 const scopeTabsEl = document.getElementById("scopeTabs");
 
-const rankCaptionEl = document.getElementById("rankCaption");
+const rankNoteEl = document.getElementById("rankNote");
 const rankListEl = document.getElementById("rankList");
-
-const myRankEl = document.getElementById("myRank");
-const myRankPositionEl = document.getElementById("myRankPosition");
-const myRankNameEl = document.getElementById("myRankName");
-const myRankScoreEl = document.getElementById("myRankScore");
+const rankSelfEl = document.getElementById("rankSelf");
 
 const navToastEl = document.getElementById("navToast");
 const previewRankErrorEl = document.getElementById("previewRankError");
@@ -87,15 +83,19 @@ function fillSelect(selectEl, values, selected) {
   });
 }
 
-function renderTabs(containerEl, values, selected, onSelect) {
-  containerEl.replaceChildren();
+function renderScopeTabs() {
+  scopeTabsEl.replaceChildren();
 
-  values.forEach((value) => {
+  CONFIG.scopes.forEach((value) => {
     const button = document.createElement("button");
-    button.className = value === selected ? "tab-button selected" : "tab-button";
+    button.className = value === state.scope ? "rank-tab selected" : "rank-tab";
     button.textContent = value;
-    button.addEventListener("click", () => onSelect(value));
-    containerEl.append(button);
+    button.addEventListener("click", () => {
+      state.scope = value;
+      renderScopeTabs();
+      renderRanking();
+    });
+    scopeTabsEl.append(button);
   });
 }
 
@@ -150,13 +150,13 @@ function myGlobalEntry() {
 // ==========================================================
 // 描画
 // ==========================================================
-function appendRow(entry) {
+function appendRow(containerEl, entry) {
   const row = document.createElement("li");
   row.className = entry.self ? "rank-row self" : "rank-row";
 
   const position = document.createElement("span");
   position.className = "rank-position";
-  position.textContent = entry.position + "位";
+  position.textContent = entry.position.toLocaleString() + "位";
 
   const name = document.createElement("span");
   name.className = "rank-name";
@@ -167,12 +167,14 @@ function appendRow(entry) {
   score.textContent = entry.score.toLocaleString();
 
   row.append(position, name, score);
-  rankListEl.append(row);
+  containerEl.append(row);
 }
 
 function renderRanking() {
   rankListEl.replaceChildren();
-  rankCaptionEl.textContent = state.mode + " / " + state.difficulty + " / " + state.format + " ・ " + state.period;
+  rankSelfEl.replaceChildren();
+  rankSelfEl.hidden = true;
+  rankNoteEl.textContent = "";
 
   // 取得できなかった場合はエラーを出さず、文言だけ差し替える
   if (state.fetchFailed) {
@@ -180,43 +182,28 @@ function renderRanking() {
     row.className = "rank-empty";
     row.textContent = CONFIG.fetchFailedText;
     rankListEl.append(row);
-    myRankEl.hidden = true;
+    rankNoteEl.textContent = CONFIG.fetchFailedText;
     return;
   }
 
   if (state.scope === "グローバル") {
-    fetchGlobalRanking().forEach(appendRow);
+    fetchGlobalRanking().forEach((entry) => appendRow(rankListEl, entry));
 
-    const mine = myGlobalEntry();
-    myRankPositionEl.textContent = mine.position.toLocaleString() + "位";
-    myRankNameEl.textContent = mine.name;
-    myRankScoreEl.textContent = mine.score.toLocaleString();
-    myRankEl.hidden = false;
+    // 自分の順位は上位に出てこないので、最下部に切り出して置く
+    appendRow(rankSelfEl, Object.assign(myGlobalEntry(), { self: true }));
+    rankSelfEl.hidden = false;
     return;
   }
 
-  fetchLocalRanking().forEach(appendRow);
-  myRankEl.hidden = true;
+  fetchLocalRanking().forEach((entry) => appendRow(rankListEl, entry));
 }
-
 // ==========================================================
 // 操作
 // ==========================================================
-function selectPeriod(value) {
-  state.period = value;
-  renderTabs(periodTabsEl, CONFIG.periods, state.period, selectPeriod);
-  renderRanking();
-}
-
-function selectScope(value) {
-  state.scope = value;
-  renderTabs(scopeTabsEl, CONFIG.scopes, state.scope, selectScope);
-  renderRanking();
-}
-
 fillSelect(modeSelectEl, CONFIG.modes, state.mode);
 fillSelect(difficultySelectEl, CONFIG.difficulties, state.difficulty);
 fillSelect(formatSelectEl, CONFIG.formats, state.format);
+fillSelect(periodSelectEl, CONFIG.periods, state.period);
 
 modeSelectEl.addEventListener("change", () => {
   state.mode = modeSelectEl.value;
@@ -228,6 +215,10 @@ difficultySelectEl.addEventListener("change", () => {
 });
 formatSelectEl.addEventListener("change", () => {
   state.format = formatSelectEl.value;
+  renderRanking();
+});
+periodSelectEl.addEventListener("change", () => {
+  state.period = periodSelectEl.value;
   renderRanking();
 });
 
@@ -242,6 +233,5 @@ previewRankErrorEl.addEventListener("click", () => {
 // ==========================================================
 // 初期表示
 // ==========================================================
-renderTabs(periodTabsEl, CONFIG.periods, state.period, selectPeriod);
-renderTabs(scopeTabsEl, CONFIG.scopes, state.scope, selectScope);
+renderScopeTabs();
 renderRanking();

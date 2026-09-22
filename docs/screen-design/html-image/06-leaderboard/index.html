@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>06 ランキング画面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Tokumin:wght@700;800&family=Shippori+Mincho+B1:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../common/chrome.css">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -14,35 +17,44 @@
     <div class="screen-scrim"></div>
 
     <div class="top-bar">
-      <button class="back-button" data-nav="スタートメニュー">‹ 戻る</button>
-      <span class="top-bar-title">ランキング</span>
-      <span class="top-bar-spacer"></span>
+      <button class="back-button parchment" data-nav="スタートメニュー"><img class="icon icon-flip" src="../assets/icon/icon-arrow-right.png" alt=""><span>戻る</span></button>
     </div>
 
-    <!-- ボード（モード × 難易度 × プレイ形式）の選択 -->
-    <div class="board-select">
-      <select class="board-field" id="modeSelect"></select>
-      <select class="board-field" id="difficultySelect"></select>
-      <select class="board-field" id="formatSelect"></select>
-    </div>
+    <!-- 本文領域。ここから先は通常のフローで縦に積む -->
+    <div class="screen-body">
+      <h1 class="screen-title">ランキング</h1>
 
-    <!-- 集計期間 -->
-    <div class="tab-row" id="periodTabs"></div>
+      <!-- 見るランキングの条件。モード × 難易度 × プレイ形式 × 集計期間 -->
+      <div class="board-tag">
+        <label class="board-item">
+          <select class="board-field" id="modeSelect"></select>
+          <img class="icon board-caret" src="../assets/icon/icon-arrow-right.png" alt="">
+        </label>
+        <label class="board-item">
+          <select class="board-field" id="difficultySelect"></select>
+          <img class="icon board-caret" src="../assets/icon/icon-arrow-right.png" alt="">
+        </label>
+        <label class="board-item">
+          <select class="board-field" id="formatSelect"></select>
+          <img class="icon board-caret" src="../assets/icon/icon-arrow-right.png" alt="">
+        </label>
+        <label class="board-item">
+          <select class="board-field" id="periodSelect"></select>
+          <img class="icon board-caret" src="../assets/icon/icon-arrow-right.png" alt="">
+        </label>
+      </div>
 
-    <!-- ローカル / グローバル -->
-    <div class="tab-row scope" id="scopeTabs"></div>
+      <!-- ランキング本体。ローカルとグローバルを切り替えて1枚に収める -->
+      <div class="rank-card parchment">
+        <div class="card-head">
+          <div class="rank-tabs" id="scopeTabs"></div>
+          <p class="card-note" id="rankNote"></p>
+        </div>
+        <ol class="rank-list" id="rankList"></ol>
 
-    <!-- ランキング本体 -->
-    <div class="rank-panel">
-      <p class="rank-caption" id="rankCaption">-</p>
-      <ol class="rank-list" id="rankList"></ol>
-    </div>
-
-    <!-- グローバル表示時のみ出す自分の順位 -->
-    <div class="my-rank" id="myRank" hidden>
-      <span class="rank-position" id="myRankPosition">-</span>
-      <span class="rank-name" id="myRankName">-</span>
-      <span class="rank-score" id="myRankScore">-</span>
+        <!-- グローバルのときだけ、自分の順位を一覧とは別に最下部へ固定で出す -->
+        <div class="rank-self" id="rankSelf" hidden></div>
+      </div>
     </div>
 
     <!-- 画面遷移の代わりに「本来は◯◯へ遷移する」と一時的に知らせる通知 -->

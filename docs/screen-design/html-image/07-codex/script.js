@@ -8,6 +8,9 @@ const CONFIG = {
   unknownText: "まだ出会っていません。",
   toastDuration: 1800,
 
+  // TODO: 遺物・ガーディアンの絵柄待ち。届くまでは仮にキャラクター画像を使う
+  artPath: "../assets/character.png",
+
   // 一覧はマスターデータ、found はユーザーデータ（どちらもタイトル画面で取得済み）
   relics: [
     { name: "砂時計の欠片", rarity: "★★", text: "制限時間が1秒のびる。", found: true },
@@ -22,15 +25,16 @@ const CONFIG = {
     { name: "深層の宝珠", rarity: "★★★", text: "クリアボーナスが2倍になる。", found: false },
     { name: "欠けた分銅", rarity: "★", text: "不正解でも連続正解が途切れにくくなる。", found: false },
     { name: "月光の砂", rarity: "★★", text: "残り時間が少ないほどスコアが上がる。", found: false },
+    { name: "月光の砂", rarity: "★★", text: "残り時間が少ないほどスコアが上がる。", found: false },
   ],
 
   guardians: [
-    { name: "石守りのゴーレム", rarity: "序盤", text: "最初のフロアに現れる。能力を持たない。", found: true },
-    { name: "刻を継ぐ番人", rarity: "中盤", text: "制限時間を1秒短くする。", found: true },
-    { name: "深層の守護者", rarity: "終盤", text: "不正解のとき意識を2減らす。", found: true },
-    { name: "囁きの影", rarity: "中盤", text: "選択肢の並びが毎問入れ替わる。", found: false },
-    { name: "砂嵐のヌシ", rarity: "終盤", text: "問題の桁が1つ増える。", found: false },
-    { name: "夢見の門番", rarity: "特殊", text: "連続正解の倍率が上がらなくなる。", found: false },
+    { name: "石守りのゴーレム", rarity: "★", text: "最初のフロアに現れる。能力を持たない。", found: true },
+    { name: "刻を継ぐ番人", rarity: "★★", text: "制限時間を1秒短くする。", found: true },
+    { name: "深層の守護者", rarity: "★★★", text: "不正解のとき意識を2減らす。", found: true },
+    { name: "囁きの影", rarity: "★★", text: "選択肢の並びが毎問入れ替わる。", found: false },
+    { name: "砂嵐のヌシ", rarity: "★★★", text: "問題の桁が1つ増える。", found: false },
+    { name: "夢見の門番", rarity: "★★★", text: "連続正解の倍率が上がらなくなる。", found: false },
   ],
 };
 
@@ -45,11 +49,13 @@ const state = {
 // 要素の取得
 // ==========================================================
 const categoryTabsEl = document.getElementById("categoryTabs");
-const collectCountEl = document.getElementById("collectCount");
+const codexCountEl = document.getElementById("codexCount");
+const collectValueEl = document.getElementById("collectValue");
+const collectFillEl = document.getElementById("collectFill");
 const codexGridEl = document.getElementById("codexGrid");
 
 const detailModalEl = document.getElementById("detailModal");
-const detailIconEl = document.getElementById("detailIcon");
+const detailArtEl = document.getElementById("detailArt");
 const detailNameEl = document.getElementById("detailName");
 const detailRarityEl = document.getElementById("detailRarity");
 const detailTextEl = document.getElementById("detailText");
@@ -78,34 +84,31 @@ function currentItems() {
   return state.category === "遺物" ? CONFIG.relics : CONFIG.guardians;
 }
 
-function currentIcon() {
-  return state.category === "遺物" ? "◈" : "👁";
-}
-
 function renderGrid() {
   const items = currentItems();
   const foundCount = items.filter((item) => item.found).length;
-  collectCountEl.textContent = foundCount + " / " + items.length;
+  const percent = Math.round((foundCount / items.length) * 100);
+
+  codexCountEl.textContent = foundCount + " / " + items.length + " 種";
+  collectValueEl.textContent = percent + "%";
+  collectFillEl.style.width = percent + "%";
 
   codexGridEl.replaceChildren();
 
   items.forEach((item) => {
     const cell = document.createElement("button");
-    cell.className = item.found ? "codex-cell" : "codex-cell unknown";
+    cell.className = item.found ? "codex-cell parchment" : "codex-cell parchment unknown";
 
-    const icon = document.createElement("span");
-    icon.className = "codex-cell-icon";
-    icon.textContent = item.found ? currentIcon() : "？";
-
-    const name = document.createElement("span");
-    name.className = "codex-cell-name";
-    name.textContent = item.found ? item.name : CONFIG.unknownName;
+    const art = document.createElement("img");
+    art.className = "codex-art";
+    art.src = CONFIG.artPath;
+    art.alt = "";
 
     const rarity = document.createElement("span");
     rarity.className = "codex-cell-rarity";
     rarity.textContent = item.found ? item.rarity : "-";
 
-    cell.append(icon, name, rarity);
+    cell.append(art, name, rarity);
     cell.addEventListener("click", () => openDetail(item));
     codexGridEl.append(cell);
   });
@@ -116,7 +119,8 @@ function renderTabs() {
 
   ["遺物", "ガーディアン"].forEach((label) => {
     const button = document.createElement("button");
-    button.className = label === state.category ? "tab-button selected" : "tab-button";
+    button.className = label === state.category ? "rank-tab selected" : "rank-tab";
+    button.textContent = label;
     button.textContent = label;
     button.addEventListener("click", () => {
       state.category = label;
@@ -131,7 +135,8 @@ function renderTabs() {
 // 詳細
 // ==========================================================
 function openDetail(item) {
-  detailIconEl.textContent = item.found ? currentIcon() : "？";
+  detailArtEl.src = CONFIG.artPath;
+  detailArtEl.classList.toggle("unknown", item.found === false);
   detailNameEl.textContent = item.found ? item.name : CONFIG.unknownName;
   detailRarityEl.textContent = item.found ? item.rarity : "-";
   detailTextEl.textContent = item.found ? item.text : CONFIG.unknownText;

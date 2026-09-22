@@ -31,20 +31,24 @@
       <p class="screen-detail">モードを選ぶと難易度を設定できます</p>
 
       <!-- モード一覧（タイトル画面で取得済みのマスターデータから表示する）。
-           縦の余りはここが吸い、下の2つは常に最下部に残る -->
+           縦の余りはここが吸う -->
       <div class="mode-list" id="modeList"></div>
+    </div>
 
-      <!-- 選択中モードの詳細と難易度。モードが選ばれるまでは非表示 -->
-      <div class="detail-panel parchment parchment-framed" id="detailPanel" hidden>
-        <button class="detail-close" id="detailClose" aria-label="閉じる">×</button>
+    <!-- モードを選ぶと下からせり上がるシート。難易度と挑戦するをここに入れる。
+         バナー広告は常時表示なので、その手前で止める -->
+    <div class="sheet-overlay" id="detailSheet">
+      <div class="sheet parchment">
+        <div class="sheet-handle"></div>
+        <button class="sheet-close" id="detailClose" aria-label="閉じる">×</button>
         <p class="detail-name" id="detailName">-</p>
         <p class="detail-desc" id="detailDesc">-</p>
         <p class="detail-label">難易度</p>
         <div class="difficulty-list" id="difficultyList"></div>
+        <button class="challenge-button" id="challengeButton" disabled>挑戦する</button>
       </div>
-
-      <button class="challenge-button" id="challengeButton" disabled>挑戦する</button>
     </div>
+
     <!-- 画面遷移の代わりに「本来は◯◯へ遷移する」と一時的に知らせる通知 -->
     <div class="nav-toast" id="navToast"></div>
     <div class="error-toast" id="errorToast"><span id="errorToastMessage">-</span></div>

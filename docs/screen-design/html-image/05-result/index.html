@@ -18,34 +18,40 @@
 
     <!-- 本文領域。ここから先は通常のフローで縦に積む -->
     <div class="screen-body">
+      <!-- そのランの条件。CLEARの上に札として掲げる -->
+      <div class="board-tag" id="resultBoard"></div>
       <h1 class="screen-title" id="resultTitle">-</h1>
 
-      <!-- 今回のランの結果 -->
+      <!-- 今回のランの結果。スコア・内訳・得た遺物を1枚にまとめる -->
       <div class="result-card parchment parchment-framed">
-        <p class="result-board" id="resultBoard">-</p>
+        <p class="result-board">SCORE</p>
         <p class="result-score" id="resultScore">-</p>
         <div class="result-stats">
           <div class="result-stat wood"><span class="stat-label">正答率</span><span class="stat-value" id="accuracyValue">-</span></div>
           <div class="result-stat wood"><span class="stat-label">到達フロア</span><span class="stat-value" id="floorValue">-</span></div>
           <div class="result-stat wood"><span class="stat-label">獲得コイン</span><span class="stat-value"><img class="icon coin-icon" src="../assets/icon/icon-coin.png" alt=""><span id="earnedCoinValue">-</span></span></div>
         </div>
+
+        <div class="card-head">
+          <p class="card-title">遺物一覧</p>
+        </div>
+        <div class="relic-list" id="relicList"></div>
       </div>
 
-      <!-- ランキング（取得できなくても進行に支障はない）。縦の余りはこの2つが分け合う -->
-      <div class="rank-card local parchment">
-        <div class="rank-head">
-          <p class="rank-title">ローカルランキング</p>
-          <p class="rank-note">自己ベスト5件</p>
+      <!-- ランキング（取得できなくても進行に支障はない）。
+           ローカルとグローバルを切り替えて1枚分の高さに収める -->
+      <div class="rank-card parchment">
+        <div class="card-head">
+          <div class="rank-tabs">
+            <button class="rank-tab selected" data-rank="local">ローカル</button>
+            <button class="rank-tab" data-rank="global">グローバル</button>
+          </div>
+          <p class="card-note" id="rankNote">-</p>
         </div>
-        <ol class="rank-list" id="localRankList"></ol>
-      </div>
+        <ol class="rank-list" id="rankList"></ol>
 
-      <div class="rank-card global parchment">
-        <div class="rank-head">
-          <p class="rank-title">グローバルランキング</p>
-          <p class="rank-note" id="myGlobalRank">-</p>
-        </div>
-        <ol class="rank-list" id="globalRankList"></ol>
+        <!-- グローバルのときだけ、自分の順位を一覧とは別に最下部へ固定で出す -->
+        <div class="rank-self" id="rankSelf" hidden></div>
       </div>
 
       <!-- 遷移ボタン（どちらも遷移の前に動画広告を表示する） -->

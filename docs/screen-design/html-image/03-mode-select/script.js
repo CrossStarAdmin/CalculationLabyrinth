@@ -61,7 +61,7 @@ const state = {
 const coinValueEl = document.getElementById("coinValue");
 const gemValueEl = document.getElementById("gemValue");
 const modeListEl = document.getElementById("modeList");
-const detailPanelEl = document.getElementById("detailPanel");
+const detailSheetEl = document.getElementById("detailSheet");
 const detailNameEl = document.getElementById("detailName");
 const detailDescEl = document.getElementById("detailDesc");
 const difficultyListEl = document.getElementById("difficultyList");
@@ -253,18 +253,18 @@ function selectMode(modeId) {
   const mode = findMode(modeId);
   detailNameEl.textContent = mode.name;
   detailDescEl.textContent = mode.desc;
-  detailPanelEl.hidden = false;
+  detailSheetEl.classList.add("show");
 
   renderModeList();
   renderDifficultyList();
   renderChallengeButton();
 }
 
-// 難易度選択を閉じる（閉じるボタン・パネルの外をタップ）
+// 難易度選択を閉じる（閉じるボタン・シートの外をタップ）
 function closeDetail() {
   state.selectedModeId = null;
   state.selectedDifficultyId = null;
-  detailPanelEl.hidden = true;
+  detailSheetEl.classList.remove("show");
 
   renderModeList();
   renderChallengeButton();
@@ -272,14 +272,10 @@ function closeDetail() {
 
 detailCloseEl.addEventListener("click", closeDetail);
 
-// パネル・モード行・挑戦するボタン・モーダル以外をタップしたら閉じる。
-// 各ボタンの処理で一覧を作り直すと押した要素がDOMから外れ、closest()が効かなくなるため
-// 捕捉フェーズ（第3引数 true）で、作り直される前に判定する
-document.querySelector(".phone-screen").addEventListener("click", (event) => {
-  if (detailPanelEl.hidden) return;
-  if (event.target.closest(".detail-panel, .mode-row, .challenge-button, .modal-overlay")) return;
-  closeDetail();
-}, true);
+// 暗幕そのものを押したときだけ閉じる（シートの中を押しても閉じない）
+detailSheetEl.addEventListener("click", (event) => {
+  if (event.target === detailSheetEl) closeDetail();
+});
 
 // ==========================================================
 // 解放（コインかジェムを使い、確認してから購入する）

@@ -1,121 +1,229 @@
 /* ==========================================================
    07 図鑑画面の固有スタイル
-   共通部分（スマホ枠・バナー広告・モーダル・確認用ボタン）は
-   ../common/chrome.css にあります
+   共通部分（スマホ枠・バナー広告・モーダル・羊皮紙・木札・
+   本文領域・アイコン・確認用ボタン）は ../common/chrome.css にあります
+
+   層の分け方は05に合わせる。台紙＝板、その上に打ち付ける手配書＝羊皮紙
    ========================================================== */
 
-.top-bar-title {
-  font-size: 13px;
-  letter-spacing: 0.1em;
-  color: var(--gold-bright);
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+/* 画面全体を明朝にして冒険譚の雰囲気に寄せる */
+body {
+  font-family: var(--font-body);
 }
 
-/* 戻るボタンと同じ幅を確保してタイトルを中央に見せる */
-.top-bar-spacer {
-  width: 62px;
+.screen-title {
+  font-family: var(--font-heading);
+  line-height: 1.1;
 }
 
-.tab-row {
-  position: absolute;
-  top: 11.5%;
-  left: 4%;
-  right: 4%;
+/* --- 上部バー --- */
+
+.back-button {
+  gap: 6px;
+  padding: 6px 13px;
+  font-family: var(--font-heading);
+  font-size: 12.5px;
+}
+
+/* 右向きの矢印素材を反転して「戻る」に使う */
+.icon-flip {
+  font-size: 12px;
+  transform: scaleX(-1);
+}
+
+/* --- 台紙 --- */
+
+.codex-card {
+  flex: 1 1 0;
+  min-height: 0; /* flexアイテムは既定で縮まないため、スクロールを効かせる */
+  display: flex;
+  flex-direction: column;
+  padding: 9px 12px;
+}
+
+/* --- 切り替えと収集数（ボードの外） --- */
+
+.codex-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rank-tabs {
   display: flex;
   gap: 6px;
 }
 
-.tab-button {
-  flex: 1;
-  padding: 8px 0;
-  background: rgba(8, 14, 24, 0.8);
+/* 背景の上に置くので、枠と文字だけで見せる */
+.rank-tab {
+  padding: 5px 12px;
+  background: rgba(8, 12, 20, 0.6);
   border: 1.5px solid #4a5265;
-  border-radius: 999px;
+  border-radius: 6px;
   color: #9aa4b5;
+  font-family: var(--font-heading);
   font-size: 11px;
   cursor: pointer;
 }
 
-.tab-button.selected {
-  border-color: var(--cyan);
-  background: rgba(20, 40, 60, 0.8);
-  color: var(--cyan);
-  font-weight: bold;
+.rank-tab.selected {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 3px rgba(212, 175, 106, 0.18);
 }
 
-.collect-count {
-  position: absolute;
-  top: 16.5%;
-  right: 4%;
+/* 全何種類中いくつ集めたか。タブの右端に置く */
+.codex-count {
   margin: 0;
-  font-size: 10px;
+  font-family: var(--font-heading);
+  font-size: 11.5px;
+  white-space: nowrap;
   color: var(--gold-bright);
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+}
+
+/* --- 収集率 --- */
+/* 板に彫った溝を金で埋めていく見立て。色は金系だけでそろえる */
+
+.collect {
+  flex: none;
+  margin-bottom: 9px;
+}
+
+.collect-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.collect-label {
+  font-family: var(--font-heading);
+  letter-spacing: 0.08em;
+  color: #c9ab7d;
+}
+
+.collect-value {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: #f6e6c6;
+  text-shadow: 0 1px 2px rgba(30, 16, 4, 0.85);
+}
+
+.collect-bar {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(20, 8, 4, 0.45);
+  box-shadow:
+    inset 0 1px 2px rgba(12, 5, 2, 0.7),
+    0 1px 0 rgba(255, 210, 160, 0.14); /* 溝の下辺の面取り */
+  overflow: hidden;
+}
+
+.collect-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f2d489, #c9a349 55%, #a8842f);
+  box-shadow: inset 0 1px 0 rgba(255, 252, 230, 0.6);
+  transition: width 0.3s ease;
 }
 
 /* --- 一覧 --- */
 
 .codex-grid {
-  position: absolute;
-  top: 20%;
-  left: 4%;
-  right: 4%;
-  bottom: 11%;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: min-content;
-  gap: 7px;
-  overflow-y: auto;
-  padding-right: 2px;
+  grid-auto-rows: 92px; /* 3列 × 4行で12件がちょうど収まる高さ */
+  gap: 6px;
+  padding: 2px; /* 浮いた枠の影が切れないよう逃がす */
 }
-
+/* 紙の上に並べるので木札にして層を分ける */
+/* 板に打ち付けた手配書。1枚ずつが紙になる */
 .codex-cell {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px 4px;
-  background: rgba(10, 14, 22, 0.88);
-  border: 1.5px solid var(--gold);
-  border-radius: 8px;
-  color: #e8ecf1;
+  gap: 2px;
+  padding: 11px 4px 6px; /* 上は留め具の分だけ空ける */
+  font-family: var(--font-heading);
   cursor: pointer;
 }
 
-/* まだ出会っていないものは伏せて表示する */
-.codex-cell.unknown {
-  border-color: #4a5265;
-  color: #6f7788;
+/* 上端の留め具。板に打ち付けた釘に見立てる */
+.codex-cell::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 42% 38%, #e6c67e 0 18%, #a87c3c 46%, #4f3616 68%, transparent 70%);
 }
 
-.codex-cell-icon {
-  font-size: 20px;
-  color: var(--cyan);
+.codex-art {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  object-fit: contain;
 }
 
-.codex-cell.unknown .codex-cell-icon {
-  color: #4a5265;
+/* まだ出会っていないものは影絵にして伏せる */
+.codex-cell.unknown .codex-art,
+.detail-art.unknown {
+  filter: brightness(0);
+  opacity: 0.4;
 }
 
 .codex-cell-name {
-  font-size: 9px;
+  font-size: 8.5px;
   line-height: 1.2;
   text-align: center;
+  color: var(--parchment-ink);
+  text-shadow: 0 1px 0 rgba(255, 250, 235, 0.6);
 }
 
 .codex-cell-rarity {
-  font-size: 8px;
-  color: var(--gold-bright);
+  letter-spacing: -0.5px;
+  color: #a8761f;
+}
+
+/* 未発見の紙は沈ませて平たくする */
+.codex-cell.unknown {
+  filter: brightness(0.82) saturate(0.85);
+  box-shadow:
+    inset 0 0 9px rgba(70, 44, 16, 0.55),
+    0 1px 0 rgba(74, 48, 20, 0.4);
 }
 
 .codex-cell.unknown .codex-cell-rarity {
-  color: #4a5265;
+  color: var(--parchment-ink-sub);
+}
 }
 
 /* --- 詳細 --- */
+/* モーダルは暗いパネルのままなので、配色もそちらに合わせる */
+
+.detail-art {
+  display: block;
+  height: 96px;
+  margin: -46px auto 10px; /* 枠の上辺にかかるように持ち上げる */
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+}
 
 .detail-rarity {
   margin: -4px 0 10px;
   font-size: 11px;
+  letter-spacing: -0.5px;
   color: var(--gold-bright);
 }

@@ -5,8 +5,14 @@
 // ==========================================================
 const CONFIG = {
   clear: true, // クリアして終わったか（false なら眠り）
-  board: "通常モード / 普通 / 4択形式",
-  score: 18420,
+  // そのランの条件。札の中で3つに区切って並べる
+  // TODO: 難易度・出題形式のアイコン素材待ち（icon が null の間は枠だけ置く）
+  board: [
+    { icon: "icon-swords.png", text: "通常モード" },
+    { icon: null, text: "普通" },
+    { icon: null, text: "4択形式" },
+  ],
+  score: "18420",
   accuracy: 92, // 正答率（%）
   floor: 3, // 到達フロア
   earnedCoin: 120, // このランで獲得するコイン
@@ -29,8 +35,38 @@ const CONFIG = {
     { position: 1, name: "カルクくん", score: 48200 },
     { position: 2, name: "名無し冒険者", score: 44100 },
     { position: 3, name: "そろばん王", score: 41800 },
+    { position: 4, name: "そろばん王", score: 41800 },
+    { position: 5, name: "そろばん王", score: 41800 },
+    { position: 6, name: "そろばん王", score: 41800 },
+    { position: 7, name: "そろばん王", score: 41800 },
+    { position: 8, name: "そろばん王", score: 41800 },
+    { position: 9, name: "そろばん王", score: 41800 },
+    { position: 10, name: "そろばん王", score: 41800 },
+    { position: 11, name: "そろばん王", score: 41800 },
+    { position: 12, name: "そろばん王", score: 41800 },
+    { position: 13, name: "そろばん王", score: 41800 },
+    { position: 14, name: "そろばん王", score: 41800 },
+    { position: 15, name: "そろばん王", score: 41800 },
+    { position: 16, name: "そろばん王", score: 41800 },
+    { position: 17, name: "そろばん王", score: 41800 },
+    { position: 18, name: "そろばん王", score: 41800 },
+    { position: 19, name: "そろばん王", score: 41800 },
+    { position: 20, name: "そろばん王", score: 41800 },
   ],
   myGlobalPosition: 1284,
+  playerName: "しおのすけ",
+
+  // そのランのモードの段階数。遺物は各段階の開始時に1つ得るので、これが枠の数になる
+  // （要件定義 2.3.1）。段階数が決まっていないエンドレスモードでは、実際に進んだ段階数が入る
+  totalFloors: 5,
+
+  // そのランで得た遺物（獲得したものだけを入れる。足りない枠は点線で表す）。
+  // 名前とレアリティは仮。data-definition/relic.md の作成後に差し替える
+  relics: [
+    { name: "炎の符", rarity: 2 },
+    { name: "氷の瓶", rarity: 1 },
+    { name: "風の羽", rarity: 3 },
+  ],
 
   fetchFailedText: "取得できません。",
 
@@ -46,6 +82,7 @@ const CONFIG = {
 // ==========================================================
 const state = {
   rankingFailed: false, // ランキングの取得に失敗したか
+  rankTab: "local", // 表示中のランキング（local / global）
   pendingNav: null, // 遷移しようとしている先（広告のあとに進む）
 };
 
@@ -59,9 +96,11 @@ const accuracyValueEl = document.getElementById("accuracyValue");
 const floorValueEl = document.getElementById("floorValue");
 const earnedCoinValueEl = document.getElementById("earnedCoinValue");
 
-const localRankListEl = document.getElementById("localRankList");
-const globalRankListEl = document.getElementById("globalRankList");
-const myGlobalRankEl = document.getElementById("myGlobalRank");
+const relicListEl = document.getElementById("relicList");
+
+const rankNoteEl = document.getElementById("rankNote");
+const rankListEl = document.getElementById("rankList");
+const rankSelfEl = document.getElementById("rankSelf");
 
 const backToMenuButtonEl = document.getElementById("backToMenuButton");
 const replayButtonEl = document.getElementById("replayButton");
@@ -106,9 +145,33 @@ function showSuccessToast(message) {
 // ==========================================================
 // 結果の描画
 // ==========================================================
+// 条件の札。アイコン素材が無い項目は枠だけ置く
+function createBoardItem(entry) {
+  const item = document.createElement("span");
+  item.className = "board-item wood";
+
+  if (entry.icon === null) {
+    const art = document.createElement("span");
+    art.className = "board-art";
+    item.append(art);
+  } else {
+    const icon = document.createElement("img");
+    icon.className = "icon board-icon";
+    icon.src = "../assets/icon/" + entry.icon;
+    icon.alt = "";
+    item.append(icon);
+  }
+
+  const text = document.createElement("span");
+  text.textContent = entry.text;
+  item.append(text);
+
+  return item;
+}
+
 function renderResult() {
   resultTitleEl.textContent = CONFIG.clear ? "CLEAR" : "SLEEP";
-  resultBoardEl.textContent = CONFIG.board;
+  resultBoardEl.replaceChildren(...CONFIG.board.map(createBoardItem));
   resultScoreEl.textContent = CONFIG.score.toLocaleString();
   accuracyValueEl.textContent = CONFIG.accuracy + "%";
   floorValueEl.textContent = "B" + CONFIG.floor;
@@ -132,7 +195,7 @@ function appendRankRow(listEl, position, name, score, isSelf) {
 
   const nameEl = document.createElement("span");
   nameEl.className = "rank-name";
-  nameEl.textContent = name;
+  nameEl.textContent = name ?? "";
 
   const scoreEl = document.createElement("span");
   scoreEl.className = "rank-score";
@@ -142,33 +205,83 @@ function appendRankRow(listEl, position, name, score, isSelf) {
   listEl.append(row);
 }
 
-function renderLocalRanking() {
-  localRankListEl.replaceChildren();
+function renderRanking() {
+  rankListEl.replaceChildren();
+  rankSelfEl.replaceChildren();
+  rankSelfEl.hidden = true;
+  rankNoteEl.textContent = "";
+
+  const isLocal = state.rankTab === "local";
+
+  document.querySelectorAll(".rank-tab").forEach((tab) => {
+    tab.classList.toggle("selected", tab.dataset.rank === state.rankTab);
+  });
 
   if (state.rankingFailed) {
-    appendEmptyRow(localRankListEl);
+    rankNoteEl.textContent = CONFIG.fetchFailedText;
+    appendEmptyRow(rankListEl);
     return;
   }
 
-  CONFIG.localRanking.forEach((entry) => {
-    const label = entry.self ? "今回のスコア" : "自己ベスト";
-    appendRankRow(localRankListEl, entry.position, label, entry.score, entry.self === true);
+  if (isLocal) {
+    CONFIG.localRanking.forEach((entry) => {
+      appendRankRow(rankListEl, entry.position, "", entry.score, entry.self === true);
+    });
+    return;
+  }
+
+  CONFIG.globalRanking.forEach((entry) => {
+    appendRankRow(rankListEl, entry.position, entry.name, entry.score, false);
   });
+
+  // 自分の順位は一覧の中に出てこないことが多いので、最下部に切り出して置く
+  appendRankRow(rankSelfEl, CONFIG.myGlobalPosition, CONFIG.playerName, CONFIG.score, true);
+  rankSelfEl.hidden = false;
 }
 
-function renderGlobalRanking() {
-  globalRankListEl.replaceChildren();
-
-  if (state.rankingFailed) {
-    myGlobalRankEl.textContent = CONFIG.fetchFailedText;
-    appendEmptyRow(globalRankListEl);
-    return;
-  }
-
-  myGlobalRankEl.textContent = "自分の順位 " + CONFIG.myGlobalPosition.toLocaleString() + "位";
-  CONFIG.globalRanking.forEach((entry) => {
-    appendRankRow(globalRankListEl, entry.position, entry.name, entry.score, false);
+document.querySelectorAll(".rank-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    state.rankTab = tab.dataset.rank;
+    renderRanking();
   });
+});
+
+// 遺物はフロアごとに1つ選ぶので、得た順に並べる
+function renderRelics() {
+  relicListEl.replaceChildren();
+
+  // 枠の数は段階数がそのまま決める
+  const slotCount = CONFIG.totalFloors;
+
+  for (let index = 0; index < slotCount; index += 1) {
+    const relic = CONFIG.relics[index];
+
+    // 未獲得の枠は点線だけ置く
+    if (relic === undefined) {
+      const empty = document.createElement("div");
+      empty.className = "relic-plate empty";
+      relicListEl.append(empty);
+      continue;
+    }
+
+    const plate = document.createElement("div");
+    plate.className = "relic-plate wood";
+
+    // TODO: 遺物のアイコン素材待ち（届くまでは枠だけ置く）
+    const art = document.createElement("span");
+    art.className = "relic-art";
+
+    const name = document.createElement("span");
+    name.className = "relic-name";
+    name.textContent = relic.name;
+
+    const rarity = document.createElement("span");
+    rarity.className = "relic-rarity";
+    rarity.textContent = "★".repeat(relic.rarity);
+
+    plate.append(art, name, rarity);
+    relicListEl.append(plate);
+  }
 }
 
 // ==========================================================
@@ -242,8 +355,7 @@ reconnectButtonEl.addEventListener("click", () => {
 // ==========================================================
 previewRankErrorEl.addEventListener("click", () => {
   state.rankingFailed = !state.rankingFailed;
-  renderLocalRanking();
-  renderGlobalRanking();
+  renderRanking();
 });
 
 previewCoinErrorEl.addEventListener("click", () => {
@@ -260,5 +372,5 @@ previewAdErrorEl.addEventListener("click", () => {
 // 初期表示（画面に遷移したときにローカル / グローバルの両方を取得する）
 // ==========================================================
 renderResult();
-renderLocalRanking();
-renderGlobalRanking();
+renderRanking();
+renderRelics();
