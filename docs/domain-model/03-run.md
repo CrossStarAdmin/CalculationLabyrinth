@@ -9,9 +9,11 @@ classDiagram
 
 class RunProfile {
     string id
+    string version
     string user_profile_id
     string play_format
     datetime started_at
+    datetime finished_at
     number challenge_count
     string mode_id
     string mode_difficulty_level_id
@@ -25,6 +27,7 @@ class RunStatus {
     string status
     number life
     boolean is_used_bell
+    string run_profile_id
     +decreaseLife() void
     +wake() void
     +isSleeping() boolean
@@ -42,6 +45,13 @@ class RunOwnedRelic {
     string relic_id
     number order
     string run_profile_id
+}
+
+class RunReward {
+    boolean is_grant_coin
+    number grant_coin_count
+    string run_profile_id
+    +grant() void
 }
 
 %% 外部（01-user.md）
@@ -81,6 +91,7 @@ UserProfile "1" -- "1..*" RunProfile
 RunProfile "1" -- "1" RunStatus
 RunProfile "1" -- "1" RunScore
 RunProfile "1" -- "1..*" RunOwnedRelic
+RunProfile "1" -- "1" RunReward
 RunProfile "1" -- "1..*" Floor
 RunProfile "1" -- "0..*" LocalRank
 RunProfile "1" -- "0..*" GlobalRank
