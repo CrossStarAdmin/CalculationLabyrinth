@@ -1,10 +1,10 @@
 /* ==========================================================
    05 結果画面の固有スタイル
-   共通部分（スマホ枠・バナー広告・モーダル・羊皮紙・木札・
-   本文領域・アイコン・確認用ボタン）は ../common/chrome.css にあります
+   共通部分（スマホ枠・バナー広告・モーダル・羊皮紙・本文領域・
+   アイコン・確認用ボタン）は ../common/chrome.css にあります
 
-   層の分け方は03に合わせる。
-   台紙＝羊皮紙、その上に乗る箱＝木札、主要な操作＝赤
+   screen-image-design/sample.png に合わせた構成。
+   紙の上に別素材を重ねず、罫線と細い金の枠で区切る
    ========================================================== */
 
 /* 画面全体を明朝にして冒険譚の雰囲気に寄せる */
@@ -12,31 +12,149 @@ body {
   font-family: var(--font-body);
 }
 
-/* 上部バーが無い画面なので、その分だけ本文を上に詰めて条件の札を置く */
 .screen-body {
-  top: 7.5%;
+  top: 7.5%; /* 上部バーが無い画面なので、その分だけ上に詰める */
+  gap: 8px;
 }
 
-/* そのランの条件。CLEARの上に3枚の札として掲げる */
+.screen-title {
+  font-family: var(--font-heading);
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+}
+
+/* タイトル下の飾り線。中央の菱形から少し離して左右に金の線を引く */
+.title-divider {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8%;
+}
+
+.title-rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-bright) 60%);
+}
+
+.title-rule:last-child {
+  background: linear-gradient(90deg, var(--gold-bright) 40%, transparent);
+}
+
+.title-diamond {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  background: var(--gold-bright);
+}
+
+/* --- カードの共通装飾 --- */
+/* 内側の細い罫と、四隅のL字の金具 */
+
+.frame-ornate {
+  position: relative;
+}
+
+.frame-ornate::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(150, 112, 50, 0.55);
+  pointer-events: none;
+}
+
+.frame-ornate::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(var(--gold), var(--gold)), linear-gradient(var(--gold), var(--gold)),
+    linear-gradient(var(--gold), var(--gold)), linear-gradient(var(--gold), var(--gold)),
+    linear-gradient(var(--gold), var(--gold)), linear-gradient(var(--gold), var(--gold)),
+    linear-gradient(var(--gold), var(--gold)), linear-gradient(var(--gold), var(--gold));
+  background-size: 13px 2px, 2px 13px, 13px 2px, 2px 13px, 13px 2px, 2px 13px, 13px 2px, 2px 13px;
+  background-position:
+    0 0, 0 0,
+    100% 0, 100% 0,
+    0 100%, 0 100%,
+    100% 100%, 100% 100%;
+}
+
+/* 見出し。左右に飾り罫と菱形を置く */
+.card-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  color: var(--parchment-ink);
+  text-shadow: 0 1px 0 rgba(255, 250, 235, 0.65);
+}
+
+.rule {
+  position: relative;
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(140, 100, 45, 0.85));
+}
+
+.rule:last-child {
+  background: linear-gradient(90deg, rgba(140, 100, 45, 0.85), transparent);
+}
+
+/* 罫の内側の端に菱形を置く */
+.rule::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -2px;
+  width: 5px;
+  height: 5px;
+  transform: translateY(-50%) rotate(45deg);
+  background: rgba(140, 100, 45, 0.9);
+}
+
+.rule:last-child::after {
+  right: auto;
+  left: -2px;
+}
+
+/* --- そのランの条件 --- */
+
 .board-tag {
   flex: none;
-  align-self: center;
   display: flex;
-  gap: 5px;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-heading);
   font-size: 11px;
   letter-spacing: 0.06em;
-  text-shadow: 0 1px 2px rgba(30, 16, 4, 0.85);
+  color: #e6d6b4;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
 }
 
 .board-item {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
+  gap: 6px;
+  padding: 0 11px;
 }
 
-/* 茶色の素材は木札の上では沈むので明るくする */
+/* 項目の間に細い縦罫を入れる */
+.board-item + .board-item {
+  border-left: 1px solid rgba(230, 214, 180, 0.35);
+}
+
 .board-icon {
   font-size: 14px;
   filter: brightness(2.6) saturate(0.7);
@@ -47,57 +165,51 @@ body {
   flex: none;
   width: 12px;
   height: 12px;
-  border: 1px dashed rgba(246, 230, 198, 0.45);
+  border: 1px dashed rgba(230, 214, 180, 0.45);
   border-radius: 2px;
-}
-
-.screen-title {
-  font-family: var(--font-heading);
-  line-height: 1.1; /* 見出しの行間を詰めて、下のランキングに高さを回す */
 }
 
 /* --- 今回のランの結果 --- */
 
 .result-card {
   flex: none;
-  padding: 10px;
+  padding: 12px 14px 10px;
   text-align: center;
 }
 
-.result-board {
-  margin: 0 0 2px;
-  color: var(--parchment-ink-sub);
-}
-
 .result-score {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-family: var(--font-heading);
-  font-size: 31px;
+  font-size: 32px;
   font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: 0.03em;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
   color: var(--parchment-ink);
   text-shadow: 0 1px 0 rgba(255, 250, 235, 0.7);
 }
 
+/* 内訳は箱にせず、紙に引いた罫線で区切る */
 .result-stats {
   display: flex;
-  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(140, 100, 45, 0.45);
 }
 
-/* 紙の上に乗るので木札にして層を分ける */
 .result-stat {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  padding: 7px 4px;
+}
+
+.result-stat + .result-stat {
+  border-left: 1px solid rgba(140, 100, 45, 0.35);
 }
 
 .stat-label {
-  font-size: 9px;
-  color: #d6bd93;
+  font-size: 9.5px;
+  color: var(--parchment-ink-sub);
 }
 
 .stat-value {
@@ -107,83 +219,69 @@ body {
   font-family: var(--font-heading);
   font-size: 14px;
   font-weight: 700;
-  text-shadow: 0 1px 2px rgba(30, 16, 4, 0.8);
-}
-
-.coin-icon {
-  font-size: 13px;
-}
-
-/* --- カードの見出し（遺物・ランキング共通） --- */
-
-.card-head {
-  flex: none;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 5px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid rgba(92, 58, 22, 0.45);
-}
-
-.card-title {
-  margin: 0;
-  font-family: var(--font-heading);
-  font-size: 11.5px;
-  font-weight: 700;
   color: var(--parchment-ink);
   text-shadow: 0 1px 0 rgba(255, 250, 235, 0.6);
 }
 
-.card-note {
-  margin: 0;
-  font-size: 9px;
-  white-space: nowrap;
-  color: var(--parchment-ink-sub);
+.coin-icon {
+  font-size: 15px;
 }
 
-/* --- 得た遺物 --- */
-/* フロアごとに1つ選ぶので最大5枚。紙の上に札を並べる */
+/* --- そのランで得た遺物 --- */
 
-/* スコアと遺物一覧の境目。結果カードの中を2段に分ける */
-.result-card .card-head {
-  margin-top: 11px;
-  padding-top: 9px;
+.relic-card {
+  flex: none;
+  padding: 8px 12px;
 }
 
-/* 枠は常に5つ見える幅にそろえ、6つ目からは横スクロールで見る */
+.relic-card .card-title {
+  margin-bottom: 4px;
+}
+
+/* 収まらない分は横スクロールで見る */
 .relic-list {
   display: flex;
-  gap: 5px;
+  gap: 6px;
   overflow-x: auto;
-  padding-bottom: 7px; /* 札の厚みの影とスクロールバーの分 */
+  padding-bottom: 2px;
 }
 
 .relic-plate {
-  flex: 0 0 calc((100% - 4 * 5px) / 5);
+  flex: 0 0 60px;
   min-width: 0;
-  min-height: 58px; /* 全部が未獲得でも段の高さが変わらないようにする */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 2px;
-  padding: 5px 2px;
+  padding: 4px 4px 3px;
+  /* 紙の上に一段くぼませた枠を置く */
+  background: rgba(120, 86, 44, 0.09);
+  border: 1px solid rgba(140, 100, 45, 0.45);
+  border-radius: 3px;
+  cursor: pointer;
 }
 
-/* 未獲得の枠。札を置かず点線で覆う */
+.relic-plate:active .relic-art {
+  transform: translateY(1px) scale(0.96);
+}
+
+/* 未獲得の枠。中身を置かず点線で覆う */
 .relic-plate.empty {
-  border: 1px dashed rgba(92, 58, 22, 0.55);
-  border-radius: 5px;
-  background: rgba(92, 58, 22, 0.07);
+  border-style: dashed;
+  background: rgba(92, 58, 22, 0.06);
+  cursor: default;
 }
 
-/* TODO: 遺物のアイコン素材待ち。届くまでは枠だけ置く */
 .relic-art {
-  width: 22px;
-  height: 22px;
-  border: 1px dashed rgba(246, 230, 198, 0.4);
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 3px rgba(60, 36, 14, 0.4));
+}
+
+/* 絵柄がまだ無い遺物は枠だけ置く */
+span.relic-art {
+  border: 1px dashed rgba(92, 58, 22, 0.5);
   border-radius: 3px;
 }
 
@@ -193,19 +291,20 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--font-heading);
-  font-size: 9px;
-  text-shadow: 0 1px 2px rgba(30, 16, 4, 0.8);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--parchment-ink);
+  text-shadow: 0 1px 0 rgba(255, 250, 235, 0.6);
 }
 
 .relic-rarity {
-  font-size: 7.5px;
-  letter-spacing: -0.5px;
-  color: #e8c877;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: #c9962c;
 }
 
 /* --- ランキング --- */
-/* 行は箱にせず、紙に引いた罫線で区切る。
-   ローカルとグローバルは1枚のカードをタブで切り替える */
+/* 行は箱にせず、紙に引いた罫線で区切る */
 
 .rank-card {
   flex: 1 1 0;
@@ -215,29 +314,47 @@ body {
   padding: 9px 12px;
 }
 
-.rank-tabs {
+.rank-head {
+  flex: none;
   display: flex;
-  gap: 4px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(140, 100, 45, 0.4);
 }
 
+.card-note {
+  margin: 0 0 4px;
+  font-size: 9px;
+  white-space: nowrap;
+  color: var(--parchment-ink-sub);
+}
+
+.rank-tabs {
+  display: flex;
+}
+
+/* 選択中は朱の下線で示す */
 .rank-tab {
-  padding: 3px 9px;
+  padding: 3px 12px 5px;
   background: transparent;
-  border: 1px solid transparent;
-  border-radius: 4px 4px 0 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
   color: var(--parchment-ink-sub);
   font-family: var(--font-heading);
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
 }
 
-/* 選択中は紙に押した印のように、文字を濃くして下に線を引く */
+.rank-tab + .rank-tab {
+  border-left: 1px solid rgba(140, 100, 45, 0.4);
+}
+
 .rank-tab.selected {
-  color: var(--parchment-ink);
+  color: #8e2318;
   font-weight: 700;
-  background: rgba(120, 86, 44, 0.16);
-  border-color: rgba(92, 58, 22, 0.4);
-  border-bottom-color: transparent;
+  border-bottom-color: #8e2318;
   text-shadow: 0 1px 0 rgba(255, 250, 235, 0.6);
 }
 
@@ -248,7 +365,6 @@ body {
   /* 自分の行の帯（margin: 0 -6px）がはみ出さないよう、同じ分だけ内側に余白を取る */
   margin: 0 -6px;
   padding: 0 6px;
-
   list-style: none;
 }
 
@@ -256,28 +372,29 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 3px 0;
-  font-size: 10.5px;
+  padding: 4px 0;
+  font-size: 11px;
   color: var(--parchment-ink);
 }
 
 /* 行の間だけ罫線を引く（最後の行の下には引かない） */
 .rank-row + .rank-row {
-  border-top: 1px solid rgba(92, 58, 22, 0.2);
+  border-top: 1px solid rgba(140, 100, 45, 0.25);
 }
 
-/* 自分の行は紙に印を押したように帯を敷いて見分ける */
+/* 自分の行は朱の帯を敷いて見分ける */
 .rank-row.self {
   margin: 0 -6px;
-  padding: 3px 6px;
-  border-radius: 3px;
-  background: rgba(126, 28, 20, 0.16);
-  box-shadow: inset 2px 0 0 rgba(126, 28, 20, 0.8);
+  padding: 4px 6px;
+  border-top-color: transparent;
+  border-radius: 999px;
+  background: rgba(190, 120, 110, 0.28);
+  color: #8e2318;
   font-weight: 700;
 }
 
 .rank-position {
-  min-width: 26px; /* 4桁の順位でも折り返さないよう、下限だけ決める */
+  min-width: 30px; /* 4桁の順位でも折り返さないよう、下限だけ決める */
   white-space: nowrap;
   color: var(--parchment-ink-sub);
   font-variant-numeric: tabular-nums;
@@ -305,7 +422,7 @@ body {
   flex: none;
   margin-top: 5px;
   padding-top: 6px;
-  border-top: 1px solid rgba(92, 58, 22, 0.45);
+  border-top: 1px solid rgba(140, 100, 45, 0.45);
 }
 
 /* [hidden] より display が勝ってしまい常時表示になるのを防ぐ */
@@ -315,41 +432,37 @@ body {
 
 /* 取得できなかったときの文言（エラーは出さない） */
 .rank-empty {
-  padding: 3px 0;
+  padding: 4px 0;
   font-size: 10px;
   color: var(--parchment-ink-sub);
 }
 
 /* --- 遷移ボタン --- */
+/* 見た目は共通の .modal-button を使う */
 
 .result-actions {
   flex: none;
-  display: flex;
-  gap: 8px;
 }
 
-/* 副の操作。素材を足さず、枠と文字だけで見せる */
-.result-button {
-  flex: 1;
-  padding: 11px 0;
-  background: rgba(8, 12, 20, 0.6);
-  border: 1.5px solid var(--gold);
-  border-radius: 6px;
+/* --- 遺物の詳細モーダル --- */
+
+.relic-detail-art {
+  display: block;
+  height: 84px;
+  margin: -44px auto 10px; /* 枠の上辺にかかるように持ち上げる */
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+}
+
+.relic-detail-art[hidden] {
+  display: none;
+}
+
+.relic-detail-rarity {
+  margin: -4px 0 10px;
+  font-size: 12px;
+  letter-spacing: 1px;
   color: var(--gold-bright);
-  font-family: var(--font-heading);
-  font-size: 13.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  box-shadow: inset 0 0 0 3px rgba(212, 175, 106, 0.18);
-  cursor: pointer;
-}
-
-/* 主要な操作。画面で唯一の赤にする（03の「挑戦する」と同じ扱い） */
-.result-button.primary {
-  background: rgba(126, 28, 20, 0.88);
-  box-shadow:
-    inset 0 0 0 3px rgba(212, 175, 106, 0.2),
-    0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 /* --- 動画広告のプレースホルダ --- */

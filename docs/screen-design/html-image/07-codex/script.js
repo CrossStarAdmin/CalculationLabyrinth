@@ -108,7 +108,7 @@ function renderGrid() {
     rarity.className = "codex-cell-rarity";
     rarity.textContent = item.found ? item.rarity : "-";
 
-    cell.append(art, name, rarity);
+    cell.append(art, rarity);
     cell.addEventListener("click", () => openDetail(item));
     codexGridEl.append(cell);
   });

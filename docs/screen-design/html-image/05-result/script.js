@@ -12,8 +12,8 @@ const CONFIG = {
     { icon: null, text: "普通" },
     { icon: null, text: "4択形式" },
   ],
-  score: "18420",
-  accuracy: 92, // 正答率（%）
+  score: 18420,
+  accuracy: 54, // 正答率（%）
   floor: 3, // 到達フロア
   earnedCoin: 120, // このランで獲得するコイン
 
@@ -62,10 +62,11 @@ const CONFIG = {
 
   // そのランで得た遺物（獲得したものだけを入れる。足りない枠は点線で表す）。
   // 名前とレアリティは仮。data-definition/relic.md の作成後に差し替える
+  // art は assets/rerics/ の絵柄。無い遺物は枠だけ置く
   relics: [
-    { name: "炎の符", rarity: 2 },
-    { name: "氷の瓶", rarity: 1 },
-    { name: "風の羽", rarity: 3 },
+    { name: "炎の符", rarity: 2, art: "../assets/rerics/item1.png", text: "正解するたびにスコアが5%上がる。" },
+    { name: "氷の瓶", rarity: 1, art: "../assets/rerics/item2.png", text: "制限時間が1秒のびる。" },
+    { name: "風の羽", rarity: 3, art: "../assets/rerics/item3.webp", text: "連続正解の倍率が2倍になる。" },
   ],
 
   fetchFailedText: "取得できません。",
@@ -97,6 +98,13 @@ const floorValueEl = document.getElementById("floorValue");
 const earnedCoinValueEl = document.getElementById("earnedCoinValue");
 
 const relicListEl = document.getElementById("relicList");
+
+const relicModalEl = document.getElementById("relicModal");
+const relicDetailArtEl = document.getElementById("relicDetailArt");
+const relicDetailNameEl = document.getElementById("relicDetailName");
+const relicDetailRarityEl = document.getElementById("relicDetailRarity");
+const relicDetailTextEl = document.getElementById("relicDetailText");
+const relicDetailCloseEl = document.getElementById("relicDetailClose");
 
 const rankNoteEl = document.getElementById("rankNote");
 const rankListEl = document.getElementById("rankList");
@@ -148,7 +156,7 @@ function showSuccessToast(message) {
 // 条件の札。アイコン素材が無い項目は枠だけ置く
 function createBoardItem(entry) {
   const item = document.createElement("span");
-  item.className = "board-item wood";
+  item.className = "board-item";
 
   if (entry.icon === null) {
     const art = document.createElement("span");
@@ -173,7 +181,7 @@ function renderResult() {
   resultTitleEl.textContent = CONFIG.clear ? "CLEAR" : "SLEEP";
   resultBoardEl.replaceChildren(...CONFIG.board.map(createBoardItem));
   resultScoreEl.textContent = CONFIG.score.toLocaleString();
-  accuracyValueEl.textContent = CONFIG.accuracy + "%";
+  accuracyValueEl.textContent = CONFIG.accuracy + "問";
   floorValueEl.textContent = "B" + CONFIG.floor;
   earnedCoinValueEl.textContent = CONFIG.earnedCoin;
 }
@@ -225,7 +233,8 @@ function renderRanking() {
 
   if (isLocal) {
     CONFIG.localRanking.forEach((entry) => {
-      appendRankRow(rankListEl, entry.position, "", entry.score, entry.self === true);
+      const label = entry.self ? "今回の結果" : "";
+      appendRankRow(rankListEl, entry.position, label, entry.score, entry.self === true);
     });
     return;
   }
@@ -264,25 +273,43 @@ function renderRelics() {
       continue;
     }
 
-    const plate = document.createElement("div");
-    plate.className = "relic-plate wood";
+    // 獲得済みはタップで詳細を開くのでボタンにする
+    const plate = document.createElement("button");
+    plate.className = "relic-plate";
 
-    // TODO: 遺物のアイコン素材待ち（届くまでは枠だけ置く）
-    const art = document.createElement("span");
+    // 絵柄がある遺物は画像、無い遺物は枠だけ置く
+    let art;
+    if (relic.art === undefined) {
+      art = document.createElement("span");
+    } else {
+      art = document.createElement("img");
+      art.src = relic.art;
+      art.alt = "";
+    }
     art.className = "relic-art";
-
-    const name = document.createElement("span");
-    name.className = "relic-name";
-    name.textContent = relic.name;
 
     const rarity = document.createElement("span");
     rarity.className = "relic-rarity";
-    rarity.textContent = "★".repeat(relic.rarity);
 
     plate.append(art, name, rarity);
+    plate.addEventListener("click", () => openRelicDetail(relic));
     relicListEl.append(plate);
   }
 }
+
+// 遺物の詳細
+function openRelicDetail(relic) {
+  relicDetailArtEl.src = relic.art === undefined ? "" : relic.art;
+  relicDetailArtEl.hidden = relic.art === undefined;
+  relicDetailNameEl.textContent = relic.name;
+  relicDetailRarityEl.textContent = "★".repeat(relic.rarity);
+  relicDetailTextEl.textContent = relic.text;
+  relicModalEl.hidden = false;
+}
+
+relicDetailCloseEl.addEventListener("click", () => {
+  relicModalEl.hidden = true;
+});
 
 // ==========================================================
 // 遷移（メニューに戻る・もう一度遊ぶ）
