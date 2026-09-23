@@ -12,6 +12,9 @@ class Mode {
     string name
     string description
     number gem_amount
+    number? floor_count
+    number questions_per_floor
+    boolean has_relic
     number coin_amount
 }
 
