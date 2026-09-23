@@ -45,6 +45,11 @@ RelicPackageUnlock {
     boolean is_collected
 }
 
+RelicUnlock {
+    string relic_id
+    boolean is_collected
+}
+
 GuardianUnlock {
     string guardian_id
     string unlock_id
@@ -197,12 +202,14 @@ UserProfile ||--|| Gem: ""
 
 UserProfile ||--|| Unlock: ""
 Unlock ||--|{ RelicPackageUnlock: ""
+RelicPackageUnlock ||--|{ RelicUnlock: ""
 Unlock ||--|{ GuardianUnlock: ""
 Unlock ||--|{ ModeUnlock: ""
 ModeUnlock ||--|{ ModeDifficultyLevelUnlock: ""
 
 RelicPackageUnlock ||--|| RelicPackage: ""
 RelicPackage ||--|{ Relic: ""
+RelicUnlock ||--|| Relic: ""
 
 GuardianUnlock ||--|| Guardian: ""
 

@@ -8,6 +8,8 @@
 | --- | --- |
 | データの権威。改竄されると成立しないもの | **Cloud Functions 経由でのみ書き込む** |
 | クライアントから直接読み書きしてよいもの | Security Rules で許可した範囲に限る |
+| クライアントの申告 | 信用しない。サーバが再計算・照合できる形で受け取る |
+| 対象プラットフォーム | iOS のみ。Android を後から追加できる構成にする (§4.7) |
 
 ## 2. クライアント
 
@@ -16,41 +18,50 @@
 | フレームワーク | Flutter (Dart) | |
 | 状態管理 | Riverpod | `presentation/` でのみ使用 |
 | ルーティング | go_router | 宣言的、ディープリンク対応 |
-| 認証 | firebase_auth | 匿名認証 |
+| 認証 | firebase_auth | 匿名認証 → メール / パスワード連携 (§4.2) |
+| 不正クライアント対策 | firebase_app_check | App Attest (§4.1) |
 | データアクセス | cloud_firestore | |
-| マスターデータ取得 | firebase_storage | §5.2 |
-| ローカル保存 | shared_preferences / hive | 設定・キャッシュ |
+| マスターデータ取得 | firebase_storage | §4.3 |
+| ローカル保存 | shared_preferences / hive | 音量設定・マスターデータのキャッシュ |
+| 乱数生成 | 自前実装 | サーバと同一アルゴリズム (§4.4) |
 | アニメーション | flutter_animate | |
 | 効果音 | audioplayers | BGM / SE |
-| 課金 | in_app_purchase | レシート検証はサーバ側 (§3) |
-| 広告 | google_mobile_ads | バナー / 動画 / リワード |
+| 課金 | in_app_purchase | レシート検証はサーバ側 (§4.7) |
+| 広告 | google_mobile_ads | バナー / リワード。リワードは SSV で検証する (§4.5) |
+| 外部ページ表示 | url_launcher | 利用規約・プライバシーポリシー・問い合わせ |
 
 ### 2.1 動作環境
 
-- iOS 13+ / Android 8.0 (API 26)+
+- iOS 13+
 - 縦持ち固定 (ポートレート)
+- Android は対象外。追加時に対応が要る箇所は §4.7
 
 ## 3. サーバ (Firebase)
 
 | 領域 | 採用技術 | 備考 |
 | --- | --- | --- |
-| 認証 | Firebase Auth | 匿名認証 → アカウント連携 (§6-1) |
-| データストア | Cloud Firestore | プレイヤーデータ / ランデータ / スコア |
+| 認証 | Firebase Auth | 匿名認証 → メール / パスワード連携 (§4.2) |
+| 不正クライアント対策 | Firebase App Check | Firestore / Cloud Functions / Cloud Storage で強制する |
+| データストア | Cloud Firestore | §4.6 |
 | サーバロジック | Cloud Functions (TypeScript) | リージョンは `asia-northeast1` |
-| マスターデータ配信 | Cloud Storage | §5.2 |
-| 課金レシート検証 | Cloud Functions | App Store Server API |
-| 広告 | AdMob | |
+| マスターデータ配信 | Cloud Storage | §4.3 |
+| 課金レシート検証 | Cloud Functions | App Store Server API (§4.7) |
+| 広告 | AdMob | リワード広告は SSV を使う (§4.5) |
 | クラッシュレポート | Crashlytics | |
 | 分析 | Firebase Analytics | GA4 連携 |
-| 運用フラグ | Remote Config | 広告の ON/OFF・メンテナンス表示・強制アップデートなど。マスターデータには使わない (§5.2) |
+| 運用フラグ | Remote Config | 広告の ON/OFF・メンテナンス表示・強制アップデートなど。マスターデータには使わない (§4.3) |
 | 監視 | Cloud Logging / Cloud Monitoring | ログ保持期間を必ず設定する |
 | コスト管理 | Cloud Billing 予算アラート | 最初に設定する |
 
 Cloud Functions で扱う責務:
 
-- ランデータの登録とスコアの検証
-- スコアエントリの登録とリーダーボード取得
-- 通貨・解放状況・図鑑の更新
+- ランの開始 (ランID・シードの発行)
+- ランの結果の登録と検証 (シードからの再現・スコアの再計算・遭遇した遺物 / ガーディアンの図鑑への反映)
+- スコアエントリの更新とランキング (ローカル / グローバル) の取得
+- ラン報酬 (コイン) の付与
+- リワード広告の SSV コールバックの受信
+- モード / 難易度の解放、遺物パックの購入
+- 表示名の変更と NG ワードの判定
 - 課金レシート検証
 - 不正検知・警告回数の保持・サイレント BAN
 - アカウント削除
@@ -61,61 +72,143 @@ Cloud Functions で扱う責務:
 
 ```
 Flutter ── Firebase Auth 匿名認証 ──> ログイン状態
-   │
+   │         + App Check トークン
    ├── cloud_firestore で読み取り (Security Rules の範囲内)
    └── Cloud Functions 呼び出し (書き込み系はすべてこちら)
 ```
 
-- `PlayerId` は Firebase Auth の uid と同一
-- Cloud Functions は呼び出し元の uid を Firebase Auth から受け取るため、クライアントが PlayerId を詐称できない
+- `UserId` は Firebase Auth の uid と同一。画面に表示するユーザーIDも uid を使う
+- Cloud Functions は呼び出し元の uid を Firebase Auth から受け取るため、クライアントが UserId を詐称できない
+- App Check により、改造アプリやアプリ外からの呼び出しを弾く
 
-### 4.2 マスターデータの配信
+### 4.2 引き継ぎ
+
+- Firebase Auth のメール / パスワード認証を使う。メールアドレスは `{uid}@<ダミードメイン>` とし、ユーザーには uid とパスワードだけを入力させる
+- 引き継ぎ設定: 匿名アカウントに `linkWithCredential` でメール / パスワードを紐づける。uid は変わらない
+- 引き継ぎ実行: 別の端末で `signInWithEmailAndPassword` する
+
+### 4.3 マスターデータの配信
 
 遺物の効果値・出題比率・基礎点などのマスターデータは、クライアントとサーバ側スコア検証の **両方** が同じ値を参照する必要がある。
 
 **git を SoT とし、クライアントと Cloud Functions が同じ JSON を読む。**
 
 - JSON は git で管理し、デプロイで Cloud Storage に配置する
-- クライアントは起動時に取得する
-- Cloud Functions はスコア検証時に同じ JSON を読む
+- JSON にはバージョンを持たせる
+- クライアントは起動時に取得し、ローカルにキャッシュする
+- ラン開始時にマスターデータのバージョンを `runs` に記録し、検証時は同じバージョンで再現する
 - Remote Config はマスターデータに使わない。運用フラグの配信に限定する
 
 対象:
 
-- 遺物カタログ (効果・レアリティ・種別)
-- ガーディアン
+- モード
 - 難易度ごとの出題定義
+- 問題形式
+- 遺物カタログ (効果・レアリティ・種別)
+- 遺物パック
+- ガーディアン
 - スコアの各係数 (ベース / 速度ボーナス / 連続正解 / 難易度 / フロア / クリアボーナス)
+- ストーリー
 
-### 4.3 Firestore の構成方針
+### 4.4 ランの再現と検証
+
+```
+Client ── ラン開始 (モード・難易度・プレイ形式) ──> Functions
+       <── ランID・シード ──                        (runs に開始時刻・シード・マスターデータのバージョンを保存)
+Client: シードから問題・遺物候補・ガーディアンを生成してプレイ
+Client ── ラン結果 (各問の正誤と残り時間・選んだ遺物・目覚めの回数・申告スコア) ──> Functions
+Functions: 同じシードで再現 → スコア再計算・照合 → 図鑑反映・スコアエントリ更新
+```
+
+- 乱数生成器は Dart と TypeScript で同じアルゴリズムを自前実装する。言語標準の乱数は使わない
+- ラン生成とスコア計算は Dart と TypeScript の二重実装になる。共通のテストデータ (シード・入力・期待結果の JSON) を用意し、両方のテストで同じ結果になることを確認する
+- クライアントが送る遭遇した遺物 / ガーディアンは、再現結果と照合してから図鑑に反映する
+- 以下は不正とみなす
+  - 申告スコアと再計算結果の不一致
+  - 残り時間が制限時間を超えている、問題数が合わない
+  - 開始から終了までの実時間が短すぎる
+  - 目覚めの回数が SSV の記録数を超えている (§4.5)
+
+### 4.5 リワード広告の検証 (SSV)
+
+目覚めの鈴 (ゲーム画面) とラン報酬 (結果画面) は、どちらもリワード広告の視聴を条件にする。
+
+- 広告の表示時に `ServerSideVerificationOptions` のカスタムデータにランIDと用途を入れる
+- AdMob は視聴完了時に Cloud Functions の HTTP エンドポイントを呼ぶ。署名を検証し、`adRewards/{transactionId}` に記録する
+- SSV の到達は数秒遅れることがあるため、クライアントは確認中の表示を出して記録を待つ
+- ラン報酬のコインはサーバがランから計算して付与する。クライアントは付与の申請だけを送る
+- 付与はランIDごとに 1 回だけ受け付ける
+- 広告解除の購入者は、サーバが `users` の広告解除フラグを確認し、SSV なしで付与する
+
+### 4.6 Firestore の構成方針
 
 | コレクション | 内容 |
 | --- | --- |
-| `players/{playerId}` | 通貨・解放状況・図鑑・ベストスコア・BAN 状態 |
-| `runs/{runId}` | スコア・正答率など検証用の記録 |
-| `scores/{scoreId}` | `boardId` (モード × 難易度 × プレイ形式)、`period`、`score`、`playerId`、`name` |
+| `users/{userId}` | ユーザー情報。詳細は `data-definition/01-user.md` |
+| `runs/{runId}` | 全ランの記録。`userId`・`boardId`・シード・マスターデータのバージョン・開始 / 終了時刻・結果・スコア・期間キー・報酬付与済みフラグ |
+| `scores/{boardId}_{period}_{periodKey}_{userId}` | プレイヤーごと・期間ごとのベスト記録。`boardId`、`period`、`periodKey`、`score`、`userId`、`name`、`runId` |
+| `adRewards/{transactionId}` | SSV で受け取った視聴記録。`runId`・用途 |
 
-- 複合インデックス `(boardId, period, score desc)` を張る
-- 現在順位は集計クエリで取得する
+- `runs` がランの SoT。`scores` はランの登録時に Functions が更新する、ベスト記録の索引
+- `boardId` はモード × 難易度 × プレイ形式
+- 期間キーは `dailyKey` (例: `2026-09-23`)・`weeklyKey` (例: `2026-W39`)。全期間はキーなし
+- **Security Rules で `runs`・`scores`・`adRewards` と、`users` の通貨フィールドはクライアントから書けないようにする。** 書き込みは Cloud Functions のみ
+
+ローカルランキング (自分の上位 5 件) は `runs` から取得する。
+
+```
+runs.where('userId', '==', me)
+    .where('boardId', '==', b)
+    .where('dailyKey', '==', 今日)   // 全期間はこの条件なし
+    .orderBy('score', 'desc')
+    .limit(5)
+```
+
+グローバルランキングは `scores` から取得し、現在順位は集計クエリで取得する。
 
 ```
 scores.where('boardId', '==', b)
       .where('period', '==', p)
+      .where('periodKey', '==', k)
+      .orderBy('score', 'desc')
+      .limit(100)
+
+scores.where('boardId', '==', b)
+      .where('period', '==', p)
+      .where('periodKey', '==', k)
       .where('score', '>', 自分のスコア)
       .count()
 ```
 
+- 複合インデックス
+  - `runs`: `(userId, boardId, score desc)`、`(userId, boardId, dailyKey, score desc)`、`(userId, boardId, weeklyKey, score desc)`
+  - `scores`: `(boardId, period, periodKey, score desc)`
 - 集計クエリはインデックス 1000 件につき 1 読み取りで課金されるため、上位件数が増えてもコストが伸びにくい
-- デイリー / ウィークリーのスコアは TTL ポリシーで自動削除する
-- **Security Rules で `scores` と、`players` の通貨・解放系フィールドはクライアントから書けないようにする。** 書き込みは Cloud Functions のみ
+- デイリー / ウィークリーの `scores` は TTL ポリシーで自動削除する
 
-### 4.4 アカウント削除
+### 4.7 課金
+
+- 課金対象: ジェム (消耗型)・広告解除 (非消耗型)・モード / 難易度の解放
+- レシート検証はストアごとに差し替えられる形で実装する。現在は App Store Server API のみ
+- 広告解除は非消耗型のため、購入の復元を用意する
+
+Android を追加するときの対応箇所:
+
+- レシート検証に Google Play Developer API を追加する
+- App Check のプロバイダに Play Integrity を追加する
+- AdMob の Android 用広告ユニットを追加する
+
+### 4.8 アカウント削除
 
 - Firebase Extension の `delete-user-data` で、Auth のユーザー削除に連動して Firestore と Cloud Storage のデータを削除する
-- ランキングに登録済みのスコアの削除はクエリが必要なため、Cloud Functions を別途用意する
+- `runs`・`scores` の削除はクエリが必要なため、Cloud Functions を別途用意する
 
 ## 5. 未決定事項
 
-1. **ユーザー ID とパスワードでの引き継ぎをどう実現するか** — Firebase Auth の標準はメール / パスワード。ID を使うならカスタム認証を挟む必要がある
-2. マスターデータを Cloud Functions に同梱するか、Cloud Storage から読むか
-3. Android を対象にするか (要件定義 5.1 は「iOS予定」だが §2.1 は両対応と書いている)
+1. マスターデータを Cloud Functions に同梱するか、Cloud Storage から読むか (どちらでも §4.3 のバージョン指定での再現ができること)
+2. 遺物・ガーディアンの画像をアプリに同梱するか、Cloud Storage から配信するか
+3. 引き継ぎ実行後に残る匿名アカウントの扱い
+4. Cloud Functions のコールドスタートを許容するか (最小インスタンスは固定費になる)
+5. 表示名の変更時に、登録済みの `scores.name` を更新するか
+6. NG ワードの判定方法
+7. 集計期間の区切り (タイムゾーン・週の始まり)

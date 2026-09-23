@@ -20,6 +20,13 @@ class RelicPackageUnlock {
     string unlock_id
     boolean is_collected
     +collect() void
+    +unlockRelic(relicId: string) void
+}
+
+class RelicUnlock {
+    string relic_id
+    boolean is_collected
+    +collect() void
 }
 
 class GuardianUnlock {
@@ -51,6 +58,9 @@ class UserProfile {
 class RelicPackage {
     <<external>>
 }
+class Relic {
+    <<external>>
+}
 
 %% 外部（09-guardian.md）
 class Guardian {
@@ -67,11 +77,13 @@ class ModeDifficultyLevel {
 
 UserProfile "1" -- "1" Unlock
 Unlock "1" -- "1..*" RelicPackageUnlock
+RelicPackageUnlock "1" -- "1..*" RelicUnlock
 Unlock "1" -- "1..*" GuardianUnlock
 Unlock "1" -- "1..*" ModeUnlock
 ModeUnlock "1" -- "1..*" ModeDifficultyLevelUnlock
 
 RelicPackageUnlock "1" -- "1" RelicPackage
+RelicUnlock "1" -- "1" Relic
 GuardianUnlock "1" -- "1" Guardian
 ModeUnlock "1" -- "1" Mode
 ModeDifficultyLevelUnlock "1" -- "1" ModeDifficultyLevel
