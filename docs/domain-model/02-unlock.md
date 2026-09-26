@@ -1,7 +1,8 @@
 # 02 解放 ドメインモデル
 
-コイン・ジェムを使った、遺物パッケージ / ガーディアン / モード / モード難易度の解放状況を管理する領域です。
-`Unlock`はユーザーごとに1つ存在し、各`*Unlock`エンティティの生成・整合性を担うアグリゲートルートとして扱っています。
+遺物パッケージ / ガーディアン / モード / モード難易度の解放状況を扱う。
+`Unlock` はユーザーごとに1つ存在するアグリゲートルートとし、各 `*Unlock` の生成・整合性を担う。
+`is_collected` は各 `*Unlock` 共通で「購入・解放が完了したか」を表す。
 
 ```mermaid
 
@@ -89,8 +90,3 @@ ModeUnlock "1" -- "1" Mode
 ModeDifficultyLevelUnlock "1" -- "1" ModeDifficultyLevel
 
 ```
-
-## メモ
-
-- `ModeDifficultyLevelUnlock`は他の`*Unlock`と違い親（`ModeUnlock`）への参照キーを持っていませんが、ユーザーの意向により現状維持としています。
-- `is_collected`は4つの`*Unlock`共通で「購入・解放が完了したかどうか」を表すフラグです。

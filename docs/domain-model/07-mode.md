@@ -1,7 +1,6 @@
 # 07 モード ドメインモデル
 
-モード・モード難易度のマスターデータを扱う領域です。
-値・振る舞いはほぼ持たず参照されるだけの定義値のため、固有のメソッドは置いていません。
+モード・モード難易度のマスターデータを扱う。解放コストを使った判定は `02-unlock.md` の `Unlock.unlockMode` / `ModeUnlock.unlockDifficultyLevel` が担う。
 
 ```mermaid
 
@@ -62,8 +61,3 @@ Mode "1" -- "1" RunProfile
 ModeDifficultyLevel "1" -- "1" RunProfile
 
 ```
-
-## メモ
-
-- `Mode` / `ModeDifficultyLevel`は`requirements-definition.md`でも「マスターデータ」的な扱い（値の定義のみ）なので、振る舞いを持たせていません。解放コストなど、値を使った判定ロジックは`02-unlock.md`側（`Unlock.unlockMode` / `ModeUnlock.unlockDifficultyLevel`）に置く想定です。
-- `Mode → RunProfile` / `ModeDifficultyLevel → RunProfile`は`03-run.md`と同じ理由（FKはあるがoverview.mdの相関図には無い）で追加しています。

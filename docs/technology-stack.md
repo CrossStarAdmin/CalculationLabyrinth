@@ -1,23 +1,23 @@
 # 技術スタック (Technology Stack)
 
 ## 1. 方針
-
-個人開発のため、無風時に固定費が発生しない構成を優先する。判断に迷う場合は以下の基準で切る。
+無風時に固定費が発生しない構成にする。改竄されると成立しないデータは Cloud Functions 経由でのみ書き込む。
 
 | 基準 | 方針 |
 | --- | --- |
-| データの権威。改竄されると成立しないもの | **Cloud Functions 経由でのみ書き込む** |
-| クライアントから直接読み書きしてよいもの | Security Rules で許可した範囲に限る |
-| クライアントの申告 | 信用しない。サーバが再計算・照合できる形で受け取る |
+| 改竄されると成立しないデータ | Cloud Functions 経由でのみ書き込む |
+| クライアントから直接読み書きするデータ | Security Rules で許可した範囲に限る |
+| クライアントの申告 | サーバが再計算・照合できる形で受け取る |
 | 対象プラットフォーム | iOS のみ。Android を後から追加できる構成にする (§4.7) |
 
 ## 2. クライアント
+Flutter (Dart)。iOS 13+、縦持ち固定。
 
 | 領域 | 採用技術 | 備考 |
 | --- | --- | --- |
 | フレームワーク | Flutter (Dart) | |
 | 状態管理 | Riverpod | `presentation/` でのみ使用 |
-| ルーティング | go_router | 宣言的、ディープリンク対応 |
+| ルーティング | go_router | |
 | 認証 | firebase_auth | 匿名認証 → メール / パスワード連携 (§4.2) |
 | 不正クライアント対策 | firebase_app_check | App Attest (§4.1) |
 | データアクセス | cloud_firestore | |
@@ -30,30 +30,25 @@
 | 広告 | google_mobile_ads | バナー / リワード。リワードは SSV で検証する (§4.5) |
 | 外部ページ表示 | url_launcher | 利用規約・プライバシーポリシー・問い合わせ |
 
-### 2.1 動作環境
-
-- iOS 13+
-- 縦持ち固定 (ポートレート)
-- Android は対象外。追加時に対応が要る箇所は §4.7
-
 ## 3. サーバ (Firebase)
+Firebase で構成し、サーバロジックは Cloud Functions (TypeScript, `asia-northeast1`) に置く。
 
 | 領域 | 採用技術 | 備考 |
 | --- | --- | --- |
 | 認証 | Firebase Auth | 匿名認証 → メール / パスワード連携 (§4.2) |
 | 不正クライアント対策 | Firebase App Check | Firestore / Cloud Functions / Cloud Storage で強制する |
 | データストア | Cloud Firestore | §4.6 |
-| サーバロジック | Cloud Functions (TypeScript) | リージョンは `asia-northeast1` |
+| サーバロジック | Cloud Functions (TypeScript) | |
 | マスターデータ配信 | Cloud Storage | §4.3 |
 | 課金レシート検証 | Cloud Functions | App Store Server API (§4.7) |
 | 広告 | AdMob | リワード広告は SSV を使う (§4.5) |
 | クラッシュレポート | Crashlytics | |
 | 分析 | Firebase Analytics | GA4 連携 |
-| 運用フラグ | Remote Config | 広告の ON/OFF・メンテナンス表示・強制アップデートなど。マスターデータには使わない (§4.3) |
-| 監視 | Cloud Logging / Cloud Monitoring | ログ保持期間を必ず設定する |
+| 運用フラグ | Remote Config | 広告の ON/OFF・メンテナンス表示・強制アップデート |
+| 監視 | Cloud Logging / Cloud Monitoring | ログ保持期間を設定する |
 | コスト管理 | Cloud Billing 予算アラート | 最初に設定する |
 
-Cloud Functions で扱う責務:
+Cloud Functions の責務:
 
 - ランの開始 (ランID・シードの発行)
 - ランの結果の登録と検証 (シードからの再現・スコアの再計算・遭遇した遺物 / ガーディアンの図鑑への反映)
@@ -69,6 +64,7 @@ Cloud Functions で扱う責務:
 ## 4. 構成上の要点
 
 ### 4.1 認証フロー
+Firebase Auth の匿名認証 + App Check でログインし、読み取りは Firestore 直接、書き込みは Cloud Functions で行う。
 
 ```
 Flutter ── Firebase Auth 匿名認証 ──> ログイン状態
@@ -78,39 +74,25 @@ Flutter ── Firebase Auth 匿名認証 ──> ログイン状態
 ```
 
 - `UserId` は Firebase Auth の uid と同一。画面に表示するユーザーIDも uid を使う
-- Cloud Functions は呼び出し元の uid を Firebase Auth から受け取るため、クライアントが UserId を詐称できない
-- App Check により、改造アプリやアプリ外からの呼び出しを弾く
+- Cloud Functions は呼び出し元の uid を Firebase Auth から取得する
 
 ### 4.2 引き継ぎ
+Firebase Auth のメール / パスワード認証を使い、ユーザーには uid とパスワードだけを入力させる。
 
-- Firebase Auth のメール / パスワード認証を使う。メールアドレスは `{uid}@<ダミードメイン>` とし、ユーザーには uid とパスワードだけを入力させる
+- メールアドレスは `{uid}@<ダミードメイン>` とする
 - 引き継ぎ設定: 匿名アカウントに `linkWithCredential` でメール / パスワードを紐づける。uid は変わらない
 - 引き継ぎ実行: 別の端末で `signInWithEmailAndPassword` する
 
 ### 4.3 マスターデータの配信
+git を SoT とし、クライアントと Cloud Functions が同じバージョンの JSON を読む。
 
-遺物の効果値・出題比率・基礎点などのマスターデータは、クライアントとサーバ側スコア検証の **両方** が同じ値を参照する必要がある。
-
-**git を SoT とし、クライアントと Cloud Functions が同じ JSON を読む。**
-
-- JSON は git で管理し、デプロイで Cloud Storage に配置する
-- JSON にはバージョンを持たせる
+- JSON は git で管理し、デプロイで Cloud Storage に配置する。JSON にはバージョンを持たせる
 - クライアントは起動時に取得し、ローカルにキャッシュする
 - ラン開始時にマスターデータのバージョンを `runs` に記録し、検証時は同じバージョンで再現する
-- Remote Config はマスターデータに使わない。運用フラグの配信に限定する
-
-対象:
-
-- モード
-- 難易度ごとの出題定義
-- 問題形式
-- 遺物カタログ (効果・レアリティ・種別)
-- 遺物パック
-- ガーディアン
-- スコアの各係数 (ベース / 速度ボーナス / 連続正解 / 難易度 / フロア / クリアボーナス)
-- ストーリー
+- 対象: モード / 難易度ごとの出題定義 / 問題形式 / 遺物カタログ (効果・レアリティ・種別) / 遺物パック / ガーディアン / スコアの各係数 / ストーリー
 
 ### 4.4 ランの再現と検証
+サーバが発行したシードから、クライアントとサーバが同じランを再現し、サーバがスコアを再計算・照合する。
 
 ```
 Client ── ラン開始 (モード・難易度・プレイ形式) ──> Functions
@@ -120,41 +102,36 @@ Client ── ラン結果 (各問の正誤と残り時間・選んだ遺物・�
 Functions: 同じシードで再現 → スコア再計算・照合 → 図鑑反映・スコアエントリ更新
 ```
 
-- 乱数生成器は Dart と TypeScript で同じアルゴリズムを自前実装する。言語標準の乱数は使わない
-- ラン生成とスコア計算は Dart と TypeScript の二重実装になる。共通のテストデータ (シード・入力・期待結果の JSON) を用意し、両方のテストで同じ結果になることを確認する
-- クライアントが送る遭遇した遺物 / ガーディアンは、再現結果と照合してから図鑑に反映する
-- 以下は不正とみなす
-  - 申告スコアと再計算結果の不一致
-  - 残り時間が制限時間を超えている、問題数が合わない
-  - 開始から終了までの実時間が短すぎる
-  - 目覚めの回数が SSV の記録数を超えている (§4.5)
+- 乱数生成器は Dart と TypeScript で同じアルゴリズムを自前実装する
+- ラン生成とスコア計算は Dart と TypeScript で二重実装し、共通のテストデータ (シード・入力・期待結果の JSON) で両方が同じ結果になることをテストする
+- 遭遇した遺物 / ガーディアンは再現結果と照合してから図鑑に反映する
+- 不正とみなす条件: 申告スコアと再計算結果の不一致 / 残り時間が制限時間を超える / 問題数が合わない / 開始から終了までの実時間が短すぎる / 目覚めの回数が SSV の記録数を超える (§4.5)
 
 ### 4.5 リワード広告の検証 (SSV)
-
-目覚めの鈴 (ゲーム画面) とラン報酬 (結果画面) は、どちらもリワード広告の視聴を条件にする。
+目覚めの鈴 (ゲーム画面) とラン報酬 (結果画面) は、SSV で検証したリワード広告の視聴を条件にする。
 
 - 広告の表示時に `ServerSideVerificationOptions` のカスタムデータにランIDと用途を入れる
 - AdMob は視聴完了時に Cloud Functions の HTTP エンドポイントを呼ぶ。署名を検証し、`adRewards/{transactionId}` に記録する
-- SSV の到達は数秒遅れることがあるため、クライアントは確認中の表示を出して記録を待つ
-- ラン報酬のコインはサーバがランから計算して付与する。クライアントは付与の申請だけを送る
-- 付与はランIDごとに 1 回だけ受け付ける
+- クライアントは確認中の表示を出して記録を待つ
+- ラン報酬のコインはサーバがランから計算して付与する。クライアントは付与の申請だけを送る。付与はランIDごとに1回だけ受け付ける
 - 広告解除の購入者は、サーバが `users` の広告解除フラグを確認し、SSV なしで付与する
 
-### 4.6 Firestore の構成方針
+### 4.6 Firestore の構成
+`runs` をランの SoT とし、`scores` はランの登録時に Functions が更新するベスト記録の索引とする。
 
 | コレクション | 内容 |
 | --- | --- |
 | `users/{userId}` | ユーザー情報。詳細は `data-definition/01-user.md` |
 | `runs/{runId}` | 全ランの記録。`userId`・`boardId`・シード・マスターデータのバージョン・開始 / 終了時刻・結果・スコア・期間キー・報酬付与済みフラグ |
-| `scores/{boardId}_{period}_{periodKey}_{userId}` | プレイヤーごと・期間ごとのベスト記録。`boardId`、`period`、`periodKey`、`score`、`userId`、`name`、`runId` |
+| `scores/{boardId}_{period}_{periodKey}_{userId}` | プレイヤーごと・期間ごとのベスト記録。`boardId`・`period`・`periodKey`・`score`・`userId`・`name`・`runId` |
 | `adRewards/{transactionId}` | SSV で受け取った視聴記録。`runId`・用途 |
 
-- `runs` がランの SoT。`scores` はランの登録時に Functions が更新する、ベスト記録の索引
 - `boardId` はモード × 難易度 × プレイ形式
 - 期間キーは `dailyKey` (例: `2026-09-23`)・`weeklyKey` (例: `2026-W39`)。全期間はキーなし
-- **Security Rules で `runs`・`scores`・`adRewards` と、`users` の通貨フィールドはクライアントから書けないようにする。** 書き込みは Cloud Functions のみ
+- **Security Rules で `runs`・`scores`・`adRewards` と、`users` の通貨フィールドは Cloud Functions のみが書き込めるようにする**
+- デイリー / ウィークリーの `scores` は TTL ポリシーで自動削除する
 
-ローカルランキング (自分の上位 5 件) は `runs` から取得する。
+ローカルランキング (自分の上位5件) は `runs` から取得する。
 
 ```
 runs.where('userId', '==', me)
@@ -180,35 +157,33 @@ scores.where('boardId', '==', b)
       .count()
 ```
 
-- 複合インデックス
-  - `runs`: `(userId, boardId, score desc)`、`(userId, boardId, dailyKey, score desc)`、`(userId, boardId, weeklyKey, score desc)`
-  - `scores`: `(boardId, period, periodKey, score desc)`
-- 集計クエリはインデックス 1000 件につき 1 読み取りで課金されるため、上位件数が増えてもコストが伸びにくい
-- デイリー / ウィークリーの `scores` は TTL ポリシーで自動削除する
+複合インデックス:
+
+- `runs`: `(userId, boardId, score desc)`、`(userId, boardId, dailyKey, score desc)`、`(userId, boardId, weeklyKey, score desc)`
+- `scores`: `(boardId, period, periodKey, score desc)`
 
 ### 4.7 課金
+課金対象はジェム (消耗型)・広告解除 (非消耗型)・モード / 難易度の解放。レシート検証はストアごとに差し替えられる形で実装し、現在は App Store Server API のみ。
 
-- 課金対象: ジェム (消耗型)・広告解除 (非消耗型)・モード / 難易度の解放
-- レシート検証はストアごとに差し替えられる形で実装する。現在は App Store Server API のみ
 - 広告解除は非消耗型のため、購入の復元を用意する
-
-Android を追加するときの対応箇所:
-
-- レシート検証に Google Play Developer API を追加する
-- App Check のプロバイダに Play Integrity を追加する
-- AdMob の Android 用広告ユニットを追加する
+- Android 追加時の対応箇所: レシート検証に Google Play Developer API / App Check に Play Integrity / AdMob の Android 用広告ユニット
 
 ### 4.8 アカウント削除
+Firebase Extension `delete-user-data` で、Auth のユーザー削除に連動して Firestore と Cloud Storage のデータを削除する。`runs`・`scores` は Cloud Functions で削除する。
 
-- Firebase Extension の `delete-user-data` で、Auth のユーザー削除に連動して Firestore と Cloud Storage のデータを削除する
-- `runs`・`scores` の削除はクエリが必要なため、Cloud Functions を別途用意する
+## 5. 未確定事項
 
-## 5. 未決定事項
-
-1. マスターデータを Cloud Functions に同梱するか、Cloud Storage から読むか (どちらでも §4.3 のバージョン指定での再現ができること)
-2. 遺物・ガーディアンの画像をアプリに同梱するか、Cloud Storage から配信するか
-3. 引き継ぎ実行後に残る匿名アカウントの扱い
-4. Cloud Functions のコールドスタートを許容するか (最小インスタンスは固定費になる)
-5. 表示名の変更時に、登録済みの `scores.name` を更新するか
-6. NG ワードの判定方法
-7. 集計期間の区切り (タイムゾーン・週の始まり)
+- マスターデータを Cloud Functions に同梱するか、Cloud Storage から読むか？（どちらでも §4.3 のバージョン指定で再現できること）
+  - A:
+- 遺物・ガーディアンの画像をアプリに同梱するか、Cloud Storage から配信するか？
+  - A:
+- 引き継ぎ実行後に残る匿名アカウントをどう扱うか？
+  - A:
+- Cloud Functions のコールドスタートを許容するか？（最小インスタンスは固定費になる）
+  - A:
+- 表示名の変更時に、登録済みの `scores.name` を更新するか？
+  - A:
+- NG ワードをどう判定するか？
+  - A:
+- 集計期間の区切り（タイムゾーン・週の始まり）は？
+  - A:
