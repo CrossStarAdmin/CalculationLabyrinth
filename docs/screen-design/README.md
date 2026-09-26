@@ -1,9 +1,8 @@
 # 画面設計
-各画面の全体像と詳細設計についてまとめます。
-画面の一覧は `requirements-definition.md` 6章に対応します。
+各画面の全体像と詳細設計。画面一覧は `requirements-definition.md` 6章に対応する。
 
 ```
-overview.md        // 画面遷移の全体像についてまとめます
+overview.md        // 画面遷移の全体像
 01-title.md        // タイトル
 02-start-menu.md   // スタートメニュー
 03-mode-select.md  // モード / 難易度選択

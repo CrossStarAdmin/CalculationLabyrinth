@@ -1,6 +1,6 @@
 # 10 問題 ドメインモデル
 
-問題種別のマスターデータを扱う領域です。
+問題種別のマスターデータを扱う。出題内容・正誤判定は `04-floor.md` の `FloorQuestion` が担う。
 
 ```mermaid
 
@@ -19,7 +19,3 @@ class FloorQuestion {
 FloorQuestion "1" -- "1" QuestionType
 
 ```
-
-## メモ
-
-- `QuestionType`は種別名だけを持つ定義値のため、メソッドは追加していません。実際の出題内容・正誤判定は`04-floor.md`の`FloorQuestion`側に置いています。
