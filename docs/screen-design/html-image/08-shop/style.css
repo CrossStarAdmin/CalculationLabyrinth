@@ -1,0 +1,120 @@
+/* ==========================================================
+   08 ショップ画面の固有スタイル
+   共通部分（スマホ枠・バナー広告・モーダル・確認用ボタン）は
+   ../common/chrome.css にあります
+   ========================================================== */
+
+.shop-list {
+  position: absolute;
+  top: 16%;
+  left: 4%;
+  right: 4%;
+  bottom: 11%;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.shop-section {
+  margin: 10px 0 6px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.shop-section:first-child {
+  margin-top: 0;
+}
+
+.shop-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 9px 11px;
+  background: rgba(10, 14, 22, 0.88);
+  border: 1.5px solid var(--gold);
+  border-radius: 10px;
+  text-align: left;
+}
+
+.shop-item-icon {
+  flex: none;
+  font-size: 20px;
+  color: var(--cyan);
+}
+
+.shop-item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.shop-item-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--gold-bright);
+}
+
+.shop-item-desc {
+  font-size: 9px;
+  line-height: 1.3;
+  color: #c7cede;
+}
+
+.shop-buy-button {
+  flex: none;
+  padding: 7px 10px;
+  background: rgba(20, 40, 60, 0.7);
+  border: 1px solid var(--cyan);
+  border-radius: 6px;
+  color: var(--cyan);
+  font-size: 10px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* 購入済みの商品は押せないようにする */
+.shop-buy-button:disabled {
+  border-color: #4a5265;
+  color: #6f7788;
+  cursor: default;
+}
+
+/* --- 通貨の選択 --- */
+
+.pay-choice {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.pay-button {
+  flex: 1;
+  padding: 9px 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1.5px solid #4a5265;
+  border-radius: 8px;
+  color: #e8ecf1;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.pay-button.selected {
+  border-color: var(--cyan);
+  background: rgba(20, 40, 60, 0.7);
+}
+
+/* --- 例外系の表示を選ぶセレクト（画面の外・デモ用） --- */
+
+.preview-select {
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid #333c4d;
+  border-radius: 6px;
+  color: #9aa4b5;
+  font-size: 12px;
+}

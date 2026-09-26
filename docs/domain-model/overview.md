@@ -44,6 +44,11 @@ RelicPackageUnlock {
     boolean is_collected
 }
 
+RelicUnlock {
+    string relic_id
+    boolean is_collected
+}
+
 GuardianUnlock {
     string guardian_id
     string unlock_id
@@ -53,6 +58,7 @@ GuardianUnlock {
 ModeUnlock {
     string mode_id
     string unlock_id
+    boolean is_collected
 }
 
 ModeDifficultyLevelUnlock {
@@ -63,9 +69,11 @@ ModeDifficultyLevelUnlock {
 %% Run
 RunProfile {
     string id
+    string version
     string user_profile_id
     string play_format
     datetime started_at
+    datetime finished_at
     number challenge_count
     string mode_id
     string mode_difficulty_level_id
@@ -76,6 +84,7 @@ RunStatus {
     string status
     number life
     boolean is_used_bell
+    string run_profile_id
 }
 
 RunScore {
@@ -86,6 +95,12 @@ RunScore {
 RunOwnedRelic {
     string relic_id
     number order
+    string run_profile_id
+}
+
+RunReward {
+    boolean is_grant_coin
+    number grant_coin_count
     string run_profile_id
 }
 
@@ -141,6 +156,9 @@ Mode {
     string name
     string description
     number gem_amount
+    number floor_count "nullable"
+    number questions_per_floor
+    boolean has_relic
     number coin_amount
 }
 
@@ -196,12 +214,14 @@ UserProfile ||--|| Gem: ""
 
 UserProfile ||--|| Unlock: ""
 Unlock ||--|{ RelicPackageUnlock: ""
+RelicPackageUnlock ||--|{ RelicUnlock: ""
 Unlock ||--|{ GuardianUnlock: ""
 Unlock ||--|{ ModeUnlock: ""
 ModeUnlock ||--|{ ModeDifficultyLevelUnlock: ""
 
 RelicPackageUnlock ||--|| RelicPackage: ""
 RelicPackage ||--|{ Relic: ""
+RelicUnlock ||--|| Relic: ""
 
 GuardianUnlock ||--|| Guardian: ""
 
@@ -213,6 +233,10 @@ UserProfile ||--|{ RunProfile: ""
 RunProfile ||--|| RunStatus: ""
 RunProfile ||--|| RunScore: ""
 RunProfile ||--|{ RunOwnedRelic: ""
+RunProfile ||--|| RunReward: ""
+RunProfile ||--|| Mode: ""
+RunProfile ||--|| ModeDifficultyLevel: ""
+RunOwnedRelic ||--|| Relic: ""
 
 RunProfile ||--|{ Floor: ""
 Floor ||--|{ FloorRelic: ""

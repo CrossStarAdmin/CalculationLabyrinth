@@ -4,22 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>02 スタートメニュー画面</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Tokumin:wght@700;800&family=Shippori+Mincho+B1:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../common/chrome.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="phone">
-  <div class="phone-screen" style="background-image:url('../assets/background.png');">
+  <div class="phone-screen" style="background-image:url('../assets/menuBackground.png');">
 
     <!-- 上部バー: 名前(タップでオプションを開く)・コイン・ジェム -->
     <div class="top-bar">
-      <button class="name-badge" id="nameBadge">
-        <span class="name-icon">✦</span>
+      <button class="name-badge parchment" id="nameBadge">
         <span id="playerNameLabel">-</span>
       </button>
       <div class="currency-badges">
-        <span class="currency-badge"><span class="currency-icon coin">●</span><span id="coinValue">-</span></span>
-        <span class="currency-badge"><span class="currency-icon gem">◆</span><span id="gemValue">-</span></span>
+        <span class="currency-badge parchment"><img class="icon currency-icon" src="../assets/icon/icon-coin.png" alt=""><span id="coinValue">-</span></span>
+        <span class="currency-badge parchment"><img class="icon currency-icon" src="../assets/icon/icon-gem.png" alt=""><span id="gemValue">-</span></span>
       </div>
     </div>
 
@@ -31,24 +34,24 @@
 
     <!-- メニュー -->
     <div class="menu-area">
-      <button class="mode-button" data-nav="スコアモード">
-        <span class="mode-icon">⚔</span>
+      <button class="mode-button parchment parchment-framed" data-nav="スコアモード">
+        <img class="icon mode-icon" src="../assets/icon/icon-swords.png" alt="">
         <span class="mode-text">
           <span class="mode-title">スコアモード</span>
           <span class="mode-sub">計算力を磨いてハイスコアを目指そう</span>
         </span>
       </button>
-      <button class="mode-button" data-nav="ストーリーモード">
-        <span class="mode-icon">📖</span>
+      <button class="mode-button parchment parchment-framed" data-nav="ストーリーモード">
+        <img class="icon mode-icon" src="../assets/icon/icon-book-open.png" alt="">
         <span class="mode-text">
           <span class="mode-title">ストーリーモード</span>
           <span class="mode-sub">あかねと遺跡を冒険しよう</span>
         </span>
       </button>
       <div class="sub-menu-row">
-        <button class="sub-menu-button" data-nav="ランキング"><span class="sub-menu-icon">🏅</span><span>ランキング</span></button>
-        <button class="sub-menu-button" data-nav="ショップ"><span class="sub-menu-icon">💰</span><span>ショップ</span></button>
-        <button class="sub-menu-button" data-nav="図鑑"><span class="sub-menu-icon">📘</span><span>図鑑</span></button>
+        <button class="sub-menu-button parchment parchment-framed" data-nav="ランキング"><img class="icon sub-menu-icon" src="../assets/icon/icon-trophy.png" alt=""><span>ランキング</span></button>
+        <button class="sub-menu-button parchment parchment-framed" data-nav="ショップ"><img class="icon sub-menu-icon" src="../assets/icon/icon-cart.png" alt=""><span>ショップ</span></button>
+        <button class="sub-menu-button parchment parchment-framed" data-nav="図鑑"><img class="icon sub-menu-icon" src="../assets/icon/icon-books.png" alt=""><span>図鑑</span></button>
       </div>
     </div>
 
@@ -59,7 +62,7 @@
     <div class="banner-ad">広告表示エリア（バナー広告・常時表示）</div>
 
     <!-- オプションモーダル -->
-    <div class="option-overlay" id="optionOverlay" hidden>
+    <div class="modal-overlay" id="optionOverlay" hidden>
       <div class="option-panel">
         <button class="option-close" id="optionClose" aria-label="閉じる">×</button>
         <h2 class="option-title">オプション</h2>
@@ -84,11 +87,11 @@
           </div>
         </div>
 
-        <button class="option-nav-row" data-nav="アカウント">アカウント <span class="chevron">›</span></button>
-        <button class="option-nav-row" data-nav="利用規約">利用規約 <span class="chevron">›</span></button>
-        <button class="option-nav-row" data-nav="プライバシーポリシー">プライバシーポリシー <span class="chevron">›</span></button>
+        <button class="option-nav-row" data-nav="アカウント">アカウント <img class="icon chevron" src="../assets/icon/icon-arrow-right.png" alt=""></button>
+        <button class="option-nav-row" data-nav="利用規約">利用規約 <img class="icon chevron" src="../assets/icon/icon-arrow-right.png" alt=""></button>
+        <button class="option-nav-row" data-nav="プライバシーポリシー">プライバシーポリシー <img class="icon chevron" src="../assets/icon/icon-arrow-right.png" alt=""></button>
 
-        <button class="option-return-button" data-nav="タイトル">⇥ タイトルへ戻る</button>
+        <button class="option-return-button" data-nav="タイトル"><img class="icon icon-flip" src="../assets/icon/icon-arrow-right.png" alt=""><span>タイトルへ戻る</span></button>
       </div>
     </div>
 
@@ -101,11 +104,13 @@
     </div>
 
     <!-- 表示名の更新に失敗した場合のエラーモーダル（サーバー側の失敗を想定） -->
-    <div class="error-modal-overlay" id="errorModalOverlay" hidden>
-      <div class="error-modal-box">
-        <div class="error-modal-icon">⚠</div>
-        <p class="error-modal-message">名前を変更できませんでした</p>
-        <button class="error-modal-close" id="errorModalClose">閉じる</button>
+    <div class="modal-overlay" id="errorModalOverlay" hidden>
+      <div class="modal-box">
+        <div class="modal-icon">⚠</div>
+        <p class="modal-message">名前を変更できませんでした</p>
+        <div class="modal-actions">
+          <button class="modal-button" id="errorModalClose">閉じる</button>
+        </div>
       </div>
     </div>
 

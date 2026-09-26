@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>09 アカウント画面</title>
+<link rel="stylesheet" href="../common/chrome.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="phone">
+  <div class="phone-screen" style="background-image:url('../assets/background.png');">
+    <div class="screen-scrim"></div>
+
+    <div class="top-bar">
+      <button class="back-button" data-nav="スタートメニュー">‹ 戻る</button>
+      <span class="top-bar-title">アカウント</span>
+      <span class="top-bar-spacer"></span>
+    </div>
+
+    <!-- ユーザーID（タイトル画面で取得済み。問い合わせの際に利用する） -->
+    <div class="id-card">
+      <p class="id-label">ユーザーID</p>
+      <p class="id-value" id="userIdValue">-</p>
+      <p class="id-note">お問い合わせのときにお伝えください</p>
+    </div>
+
+    <!-- 引き継ぎの状態 -->
+    <div class="status-card">
+      <span class="status-icon" id="takeoverIcon">-</span>
+      <span class="status-text" id="takeoverStatus">-</span>
+    </div>
+
+    <div class="menu-list">
+      <button class="menu-row" id="setupTakeoverButton">引き継ぎ設定 <span class="chevron">›</span></button>
+      <button class="menu-row" id="takeoverButton">引き継ぎ <span class="chevron">›</span></button>
+      <button class="menu-row" id="contactButton">問い合わせ <span class="chevron">›</span></button>
+      <button class="menu-row danger" id="deleteButton">アカウント削除 <span class="chevron">›</span></button>
+    </div>
+
+    <div class="nav-toast" id="navToast"></div>
+    <div class="error-toast" id="errorToast"><span id="errorToastMessage">-</span></div>
+    <div class="success-toast" id="successToast"><span id="successToastMessage">-</span></div>
+
+    <!-- バナー広告エリア（要件定義 3.4: 画面下部に常時表示） -->
+    <div class="banner-ad">広告表示エリア（バナー広告・常時表示）</div>
+
+    <!-- 引き継ぎ設定 / 引き継ぎ のフォーム -->
+    <div class="modal-overlay" id="formModal" hidden>
+      <div class="modal-box">
+        <div class="modal-icon">🔑</div>
+        <h2 class="modal-title" id="formTitle">-</h2>
+        <p class="modal-message" id="formMessage">-</p>
+        <label class="form-label">ユーザーID</label>
+        <input type="text" class="form-input" id="formUserId">
+        <label class="form-label">パスワード</label>
+        <input type="password" class="form-input" id="formPassword">
+        <div class="modal-actions">
+          <button class="modal-button" id="formCancel">いいえ</button>
+          <button class="modal-button primary" id="formConfirm">はい</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 確認（引き継ぎ実行前の警告・削除前の確認） -->
+    <div class="modal-overlay" id="confirmModal" hidden>
+      <div class="modal-box">
+        <div class="modal-icon">⚠</div>
+        <h2 class="modal-title" id="confirmTitle">-</h2>
+        <p class="modal-message" id="confirmMessage">-</p>
+        <p class="modal-note" id="confirmNote">-</p>
+        <div class="modal-actions">
+          <button class="modal-button" id="confirmCancel">いいえ</button>
+          <button class="modal-button danger" id="confirmOk">はい</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 問い合わせ先 -->
+    <div class="modal-overlay" id="contactModal" hidden>
+      <div class="modal-box">
+        <div class="modal-icon">✉</div>
+        <h2 class="modal-title">お問い合わせ</h2>
+        <p class="modal-message">
+          下記の宛先に、ユーザーIDを添えてご連絡ください。<br>
+          <span class="contact-address" id="contactAddress">-</span>
+        </p>
+        <div class="modal-actions">
+          <button class="modal-button primary" id="contactClose">閉じる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 通信エラー（引き継ぎ設定の失敗・削除の失敗） -->
+    <div class="modal-overlay" id="errorModal" hidden>
+      <div class="modal-box">
+        <div class="modal-icon">⚠</div>
+        <p class="modal-message" id="errorMessage">-</p>
+        <div class="modal-actions">
+          <button class="modal-button primary" id="reconnectButton">⟳ 再接続</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 例外系の表示を確認するためのボタン（実際の操作フローとは独立） -->
+<div class="preview-buttons">
+  <button class="preview-toggle" id="previewSetupError">引き継ぎ設定に失敗したときの表示を見る</button>
+  <button class="preview-toggle" id="previewDeleteError">削除に失敗したときの表示を見る</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

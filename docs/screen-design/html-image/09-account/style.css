@@ -1,0 +1,146 @@
+/* ==========================================================
+   09 アカウント画面の固有スタイル
+   共通部分（スマホ枠・バナー広告・モーダル・確認用ボタン）は
+   ../common/chrome.css にあります
+   ========================================================== */
+
+.top-bar-title {
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--gold-bright);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+/* 戻るボタンと同じ幅を確保してタイトルを中央に見せる */
+.top-bar-spacer {
+  width: 62px;
+}
+
+/* --- ユーザーID --- */
+
+.id-card {
+  position: absolute;
+  top: 12%;
+  left: 4%;
+  right: 4%;
+  padding: 14px 12px;
+  background: rgba(10, 14, 22, 0.88);
+  border: 1.5px solid var(--gold);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.id-label {
+  margin: 0 0 6px;
+  font-size: 10px;
+  color: #9aa4b5;
+  letter-spacing: 0.06em;
+}
+
+.id-value {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+  word-break: break-all;
+}
+
+.id-note {
+  margin: 0;
+  font-size: 9px;
+  color: #c7cede;
+}
+
+/* --- 引き継ぎの状態 --- */
+
+.status-card {
+  position: absolute;
+  top: 27%;
+  left: 4%;
+  right: 4%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid #333c4d;
+  border-radius: 8px;
+  font-size: 10px;
+  color: #c7cede;
+}
+
+.status-icon {
+  font-size: 13px;
+  color: var(--cyan);
+}
+
+/* --- メニュー --- */
+
+.menu-list {
+  position: absolute;
+  top: 34%;
+  left: 4%;
+  right: 4%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(10, 14, 22, 0.88);
+  border: 1.5px solid var(--gold);
+  border-radius: 10px;
+  color: #e8ecf1;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.menu-row.danger {
+  border-color: #a4483f;
+  color: #ffb9ae;
+}
+
+.menu-row .chevron {
+  color: #9aa4b5;
+}
+
+/* --- 入力フォーム --- */
+
+.form-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 10px;
+  color: #9aa4b5;
+  text-align: left;
+}
+
+.form-input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid #333c4d;
+  border-radius: 6px;
+  color: #e8ecf1;
+  font-size: 13px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--cyan);
+}
+
+/* --- 問い合わせ先 --- */
+
+.contact-address {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--cyan);
+  word-break: break-all;
+}

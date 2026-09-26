@@ -232,5 +232,3 @@ iOS。日本語。
   - A:
 - 広告解除はジェムで購入するか、ストア課金で直接購入するか？（3.1ではジェム、08-shop.md ではストア課金）
   - A:
-- Androidも対象にするか？（technology-stack.md は iOS / Android 両対応の記載）
-  - A:
